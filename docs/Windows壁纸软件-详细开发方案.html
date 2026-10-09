@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>拾景 · Windows 静态壁纸软件详细开发方案</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f5f7fb,#141820);--fg:light-dark(#1e293b,#e4eaf3);--paper:light-dark(#fff,#1c2430);--sub:light-dark(#536276,#a9b6c9);--line:light-dark(#dbe3ee,#384458);--blue:light-dark(#075ca8,#82beff)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.8 'Segoe UI','Microsoft YaHei',sans-serif}main{max-width:1120px;margin:32px auto;padding:48px;background:var(--paper);border-radius:18px}h1{font-size:32px;line-height:1.4}h2{margin-top:48px;padding-bottom:10px;border-bottom:1px solid var(--line);font-size:24px}h3{margin-top:26px;font-size:19px}p{margin:12px 0}a{color:var(--blue);overflow-wrap:anywhere}small,.muted{color:var(--sub)}nav{display:flex;gap:10px 20px;flex-wrap:wrap;padding:16px 0}table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}th{background:var(--bg)}.table-wrap{overflow-x:auto}pre{padding:20px;background:var(--bg);border-radius:10px;overflow-x:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace}.note{padding:16px 20px;border-left:4px solid var(--blue);background:var(--bg);margin:20px 0}.tokens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.token{padding:14px;background:var(--bg);border-radius:10px}li{margin:7px 0}.arch{display:grid;gap:10px}.arch div{padding:12px 18px;background:var(--bg);border:1px solid var(--line);border-radius:8px}.tag{color:var(--blue);font-weight:600}@media(max-width:700px){main{margin:0;padding:24px 16px;border-radius:0}.tokens{grid-template-columns:1fr}h1{font-size:26px}table{min-width:600px}}@media print{body{background:white;color:black}main{margin:0;max-width:none;padding:0;box-shadow:none}nav{display:none}h2{break-after:avoid}tr,.note{break-inside:avoid}a{color:inherit}pre{white-space:pre-wrap;overflow:visible}.table-wrap{overflow:visible}}
+</style>
+</head>
+<body><main>
+<p class="tag">开发设计稿 · 2026-10-08 · v1.0</p>
+<h1>拾景：Windows 静态壁纸软件<br/>详细开发方案</h1>
+<p>定位：免费开源、Windows 优先、WinUI 3 原生界面。每天给用户一张推荐壁纸，支持保存原图、一键设置桌面，以及导入自己的图片与图源。项目名“拾景”为临时工作名。</p>
+<div class="note"><strong>路线结论：</strong>新建 C# / WinUI 3 应用，使用本地服务层与 SQLite；借鉴现有项目的下载、图源适配和 Windows 接口实现。首版围绕静态图片闭环开发，默认无需云服务。界面以“图库导航”为主布局，将“沉浸预览”作为详情体验。本文保存实施前的设计；当前初版实现、测试与限制以 <a href="context/NOW.md">项目状态</a> 为准，完整计划不等于全部功能已交付。</div>
+<nav aria-label="目录"><a href="#scope">范围</a><a href="#ui">界面设计</a><a href="#flow">用户流程</a><a href="#architecture">架构</a><a href="#contract">服务契约</a><a href="#source">图源</a><a href="#data">数据库</a><a href="#download">下载与缓存</a><a href="#desktop">系统壁纸</a><a href="#daily">每日推荐</a><a href="#quality">性能与质量</a><a href="#delivery">打包发布</a><a href="#schedule">开发排期</a><a href="#acceptance">验收</a><a href="#references">实现参考</a></nav>
+
+<h2 id="scope">1. 范围与版本边界</h2>
+<p>采用 Windows 11 主体验、Windows 10 22H2 兼容验证的目标。兼容范围必须以具体 SDK、打包方式和实机结果确定，不把“能安装”视为“全部功能兼容”。首版 x64，ARM64 后续加入。只处理静态 JPEG、PNG、BMP；WebP 在确认 WIC 解码能力后作为扩展，不在首版宣称全平台支持。</p>
+<div class="table-wrap"><table><thead><tr><th>版本</th><th>包含功能</th><th>完成标准</th></tr></thead><tbody>
+<tr><td>P0：可发布核心</td><td>今日推荐、近期记录；发现和本地搜索；收藏；保存原图；设置桌面；显示器选择；本地文件/文件夹导入；HTTPS 图片直链；受限 JSON 清单；图源开关和诊断；主题、存储和缓存设置</td><td>“推荐 → 预览 → 保存 → 设为桌面”以及“导入 → 设为桌面”闭环可用；断网仍能使用已有原图。</td></tr>
+<tr><td>P1：使用体验增强</td><td>用户主动开启的每日自动更换；托盘；启动/睡眠恢复补偿；在线图源关键词搜索；高级裁剪和每屏独立适配；导入/导出配置；ARM64</td><td>自动任务不覆盖当天用户手动设置；多屏变更有明确结果与恢复入口。</td></tr>
+<tr><td>后续候选</td><td>Commons 精选合法授权图库、更多内置适配器、MSIX/Store、局域网图库</td><td>每个来源单独验证条款、接口和内容质量后加入。</td></tr>
+</tbody></table></div>
+<p>首版不包含动态壁纸、账户、云收藏、广告、订阅、评论、AI 推荐服务和锁屏自动设置。截图中的这些入口是视觉参考，并不自动转化为产品需求。</p>
+
+<h2 id="ui">2. 前端 UI 预览与 WinUI 实现</h2>
+<h3>2.1 两种布局的取舍</h3>
+<p><strong>图库导航：</strong>固定主导航、明确页面标题、今日大图、近期卡片、发现网格。适合频繁筛选、收藏与管理图源，作为默认主界面。<strong>沉浸预览：</strong>图片占主要区域，标题与操作浮层集中在下方，适合欣赏与设置桌面；生产版放在详情页/全屏模式中。两者共用 ViewModel 和业务服务，不维护两套业务逻辑。</p>
+<p>本次可交互预览包含“今日推荐、发现壁纸、我的图库、图源管理、设置”五页，以及详情、导入、添加图源对话框。可体验搜索/筛选、收藏、下载进度与取消、图源启用、主题、显示器与适配选择、离线状态。下载、连接测试、导入和设置桌面为本地模拟；不会读取用户文件或调用 Windows 壁纸接口。预览固定日期及尺寸、作者、图源映射均为示例数据。</p>
+<p>预览图片取自 WinDynamicDesktop 仓库内的 Apple 桌面素材，用于布局说明；它们不是 Bing/Wallhaven 的真实搜索结果，也不证明图片达到所标尺寸。正式应用必须替换为用户提供或已确认授权的素材。外部图片无法加载时，仍可查看界面和交互。</p>
+<h3>2.2 导航与页面规格</h3>
+<div class="table-wrap"><table><thead><tr><th>页面</th><th>内容与交互</th><th>WinUI 3 控件与状态</th></tr></thead><tbody>
+<tr><td>应用壳</td><td>可拖拽标题栏；左侧导航；内容区；任务状态与通知；关闭行为默认退出</td><td>AppWindow / 自定义标题栏、NavigationView、Frame、InfoBar；单实例激活。Windows 10 下验证标题栏能力并降级。</td></tr>
+<tr><td>今日推荐</td><td>本地日期、单张大图、作者/来源/实际尺寸、保存原图、设为壁纸、收藏；主动“换一张”；近期记录</td><td>Image + Grid、Button、ItemsControl；Loading / Ready / Cached / Empty / SourceError。一次推荐不会因刷新或浏览详情改变。</td></tr>
+<tr><td>发现</td><td>图源、分类、横竖屏、最低分辨率、关键词；首版本地已同步元数据筛选；明确“搜索本地图库”范围</td><td>AutoSuggestBox、ComboBox、GridView + ItemsWrapGrid；增量加载、虚拟化；加载更多/结果为空/限流/部分图源失败。</td></tr>
+<tr><td>详情 / 沉浸</td><td>大图、原图尺寸与许可链接、保存/收藏/设置；目标屏幕和全局适配方式；原图缺失时说明将先下载</td><td>独立 DetailPage + ContentDialog；保留浏览位置；显示 Preview / LoadingOriginal / Ready / ApplyFailed。</td></tr>
+<tr><td>我的图库</td><td>收藏、已下载、本地导入三组；打开文件位置；取消收藏；分别移除索引和删除应用管理副本</td><td>GridView、选项卡、菜单；Empty / MissingFile；外部源文件与用户导出文件不会由清缓存删除。</td></tr>
+<tr><td>图源管理</td><td>添加、编辑、开关、刷新、测试；本地文件夹/HTTPS直链/JSON清单；逐个错误状态</td><td>ListView、ToggleSwitch、ContentDialog、ProgressRing、InfoBar；Ready / Disabled / Syncing / Offline / Invalid / RateLimited。</td></tr>
+<tr><td>设置</td><td>主题、默认显示器、统一适配、原图导出目录、缓存上限、日志入口；P1自动更换默认关闭</td><td>ComboBox、ToggleSwitch、NumberBox、FolderPicker；首版明确标记尚未提供的功能，避免可点击的空入口。</td></tr>
+</tbody></table></div>
+<h3>2.3 视觉规范</h3>
+<div class="tokens"><div class="token"><strong>排版</strong><br/>Segoe UI / 系统中文回退；正文14 DIP，辅助12 DIP，页标题28 DIP，图片标题20 DIP；200%文本缩放单独验证。</div><div class="token"><strong>布局</strong><br/>8 DIP间距系统；内容内边距24；卡片圆角12；展开导航约208；窄窗口仅图标/顶部导航。</div><div class="token"><strong>交互</strong><br/>蓝色主操作；同组一个主按钮；明确禁用与进度；键盘焦点可见；支持减少动画。</div></div>
+<p>默认窗口建议 1180×800 DIP、最小 720×540 DIP。大于 1100 使用展开导航和三列图库，900–1100 两/三列按实际卡片最小宽度计算，720–900 收起导航与两列卡片。生产桌面最小宽度与对话中的窄屏预览是不同约束，不通过缩小字体挤压内容。适配100%、150%、200% DPI及跨屏移动。</p>
+<p>应用壳优先 Mica，内容卡片使用不透明/高对比可读表面。需要模糊应用内部大图时使用适度 Acrylic；Mica 不是实时模糊预览图的工具。避免在大图库持续使用昂贵实时效果。高对比模式关闭装饰材质，使用系统颜色；图标用 Fluent 字形，按钮都有可访问名称。</p>
+<h3>2.4 ViewModel 与组件划分</h3>
+<pre><code>ShellViewModel         导航、全局通知、当前下载摘要
+TodayViewModel         推荐日期、DailySelection、换一张命令
+DiscoverViewModel      Query、Filter、分页游标、结果集合、加载状态
+LibraryViewModel       收藏/下载/导入分页、文件丢失状态
+DetailViewModel        SelectedItem、原图状态、目标屏、应用结果
+SourcesViewModel       图源列表、同步/编辑命令、逐源诊断
+SettingsViewModel      可验证设置、保存结果、自动更换开关（P1）
+WallpaperCard          缩略图、尺寸、来源、收藏、可见操作
+SourceRow / EmptyState / DownloadStatus / AttributionBlock</code></pre>
+<p>使用 CommunityToolkit.Mvvm 的 ObservableObject、ObservableProperty、AsyncRelayCommand。ViewModel 依赖服务接口；异步命令传递取消令牌并维护 IsBusy，避免重复点击。页面离开取消页面查询，不取消已提交的全局下载。状态变化通过 DispatcherQueue 返回 UI 线程；测试不依赖 XAML 或实际桌面。</p>
+
+<h2 id="flow">3. 功能流程与异常反馈</h2>
+<div class="table-wrap"><table><thead><tr><th>动作</th><th>成功流程</th><th>失败或中断</th></tr></thead><tbody>
+<tr><td>启动应用</td><td>迁移数据库 → 修复上次中断任务 → 读取当天推荐 → 后台刷新元数据 → 显示缓存预览</td><td>单源失败不阻塞其他图源；首次无内容引导导入；数据库迁移失败保留备份并提供恢复入口。</td></tr>
+<tr><td>保存原图</td><td>解析原图地址 → 获取/复用原图 → 文件校验与落盘 → 系统保存对话框选择导出文件 → 复制原字节 → 显示打开位置</td><td>取消对话框不记录导出成功；磁盘满/拒绝访问提供选择目录；原图缓存成功但导出失败区分显示。</td></tr>
+<tr><td>设为壁纸</td><td>选择目标 → 获取原图 → 准备应用文件 → 保存原状态 → COM应用 → 记录逐屏结果</td><td>原图下载失败不触碰当前壁纸；显示器断开/部分应用失败显示逐屏状态并可重试或恢复。</td></tr>
+<tr><td>添加图源</td><td>选类型 → 输入路径/HTTPS地址 → 验证 → 测试 → 展示样本和数量 → 保存启用 → 同步</td><td>格式错误定位字段；连接失败允许保存为停用状态；重定向/地址过期/429给出可行动结果。</td></tr>
+<tr><td>本地导入</td><td>文件选择或拖放 → 解码校验 → 复制到托管目录 → SHA256去重 → 入库 → 生成缩略图</td><td>单个坏图不阻塞批次；显示导入/重复/失败数量；源目录删除后托管副本仍可用。</td></tr>
+<tr><td>收藏</td><td>写入收藏记录 → 卡片与图库同步；已存在原图保持留存策略</td><td>收藏只存元数据不会偷偷下载原图；写库失败恢复按钮状态并提示。</td></tr>
+<tr><td>删除/清理</td><td>清预览缓存仅删除可再生成缩略图；删除托管原图需要单独明确动作</td><td>当前桌面及恢复快照引用的文件受到 pin 保护；不存在文件只修复索引，不误报成功删除。</td></tr>
+</tbody></table></div>
+<p>预览将“保存原图”合并为模拟保存。生产实现必须区分“应用内部下载”和“导出到用户选择目录”；“设为壁纸”只需要内部下载，不弹出保存对话框。图库中“已下载”代表内部原图可用，导出记录只是外部文件路径记录。</p>
+<p>错误码统一映射为中文提示：Offline、RateLimited、AuthRequired、UrlExpired、InvalidImage、FileTooLarge、DiskFull、AccessDenied、SourceUnavailable、MonitorDisconnected、DesktopApplyFailed、DatabaseFailed。日志保留诊断信息，界面给出“重试、选择目录、查看已下载、停用图源”等实际操作。</p>
+
+<h2 id="architecture">4. 本地后端架构与工程目录</h2>
+<div class="arch"><div><strong>WinUI 3 / XAML</strong>：页面、可访问性、ViewModel、状态呈现</div><div>↓ 依赖接口；UI不直接发送HTTP、执行SQL或调用COM</div><div><strong>Application</strong>：推荐、下载、导出、收藏、同步、设置桌面的用例编排</div><div>↓ Domain契约与不可变结果</div><div><strong>Infrastructure</strong>：图源适配器、SQLite仓储、HTTP、文件缓存、WIC图像、Windows COM</div><div><strong>Worker（P1）</strong>：共享 Application / Infrastructure，在当前登录用户会话执行一次自动任务后退出</div></div>
+<pre><code>src/
+  Shijing.App/                WinUI 3；Views、ViewModels、Controls、Resources
+  Shijing.Domain/             模型、结果类型、图源/仓储/系统服务契约
+  Shijing.Application/        用例与策略；不依赖WinUI
+  Shijing.Infrastructure/     Providers、Persistence、Images、Storage、Windows
+  Shijing.Worker/             P1后台一次性任务入口
+tests/
+  Shijing.Application.Tests/  推荐、下载、缓存与权限策略
+  Shijing.Integration.Tests/  SQLite迁移、HTTP模拟、文件/解码流程
+  Shijing.Windows.Tests/      人工触发；桌面、多屏、安装与恢复验证
+docs/                        ADR、许可清单、开发计划、验收记录</code></pre>
+<p>目标使用 .NET 10 LTS、稳定 Windows App SDK、CommunityToolkit.Mvvm、Microsoft.Extensions.DependencyInjection / Logging / Http、Microsoft.Data.Sqlite。具体依赖版本在第一个里程碑核对并锁定，采用 Central Package Management 与 lock file；不在设计文档中把动态的“最新版”作为固定依赖。SQLite 访问优先显式SQL与小型仓储，复杂统计出现前不引入EF迁移负担。</p>
+<p>UI、下载与Worker共享 SQLite WAL；短事务、busy_timeout、单进程写入队列。跨进程推荐/桌面操作使用当前用户命名互斥锁；下载使用规范化的缓存键进行去重。网络IO、解码与磁盘写入全程离开UI线程，COM由独立串行STA线程调度。Worker与主应用互斥处理同一次自动更换。</p>
+
+<h2 id="contract">5. 本地服务契约与责任</h2>
+<p>以下是计划中的服务接口，不是HTTP后端地址，也不是已经编译的代码。在线API仅封装在图源适配器中；首版没有自建服务器费用。</p>
+<pre><code>// 省略DTO声明；所有跨层结果携带错误码、是否可重试及可选RetryAfter。
+IWallpaperProvider
+  GetCapabilities() → Browse / Search / Daily / Original / Attribution
+  BrowseAsync(SourceConfig, Query, Cursor?, CancellationToken) → WallpaperPage
+  GetDailyCandidatesAsync(SourceConfig, LocalDate, CancellationToken) → Candidate[]
+  ResolveOriginalAsync(WallpaperId, CancellationToken) → ImageLocation
+  TestAsync(SourceConfig, CancellationToken) → SourceTestResult
+
+IDailyRecommendationService
+  GetOrCreateAsync(ProfileId, LocalDate, CancellationToken) → DailySelection
+  ReplaceAsync(ProfileId, LocalDate, CancellationToken) → DailySelection
+
+IDownloadService
+  AcquireAsync(VariantId, IProgress&lt;DownloadProgress&gt;, CancellationToken) → LocalAsset
+IExportService
+  ExportAsync(AssetId, UserSelectedPath, CancellationToken) → ExportResult
+IWallpaperApplicationService
+  ApplyAsync(WallpaperId, TargetMonitors, GlobalPosition, CancellationToken) → ApplyResult
+  RestoreAsync(ApplyRunId, CancellationToken) → RestoreResult
+IMonitorService
+  EnumerateAsync(CancellationToken) → MonitorInfo[]
+IImageService
+  VerifyAsync(Path, CancellationToken) → VerifiedImage
+  CreateThumbnailAsync(AssetId, DecodePixelWidth, CancellationToken) → Thumbnail
+IImportService / ISourceService / ILibraryService / ICacheService / ISettingsService</code></pre>
+<div class="table-wrap"><table><thead><tr><th>主要DTO</th><th>必要字段 / 不变量</th></tr></thead><tbody>
+<tr><td>WallpaperItem</td><td>ID、SourceId、RemoteId、标题、作者、来源页面、许可与署名、原图/预览variant、标签、源发布日期、获取时间；不把缺失尺寸默认为4K。</td></tr>
+<tr><td>ImageLocation</td><td>HTTPS URI或受控本地路径、有效期、可选格式/大小提示；HTTP头由适配器的受限能力产生，不允许清单任意指定Cookie和Authorization。</td></tr>
+<tr><td>DownloadProgress</td><td>JobId、阶段、已接收字节、可空总字节、可空百分比；未知长度使用不确定进度。</td></tr>
+<tr><td>ApplyResult</td><td>RunId、Success/PartialFailure/Failure、逐屏设备路径与结果、原状态快照、恢复是否可用；不只返回bool。</td></tr>
+<tr><td>MonitorInfo</td><td>稳定设备路径、友好名称、物理像素矩形、主屏标记、DPI；下拉“显示器2”只是显示名称，不作永久ID。</td></tr>
+<tr><td>SourceTestResult</td><td>可访问性、结构有效性、样本项、来源条款链接、诊断码；测试成功不代表所有图片可下载或有再分发权。</td></tr>
+</tbody></table></div>
+<p>缓存/仓储/图源接口采用依赖注入；Clock、随机选择器、网络和桌面调用均可替换，便于测试。外部图源失败不得通过异常穿透到整个页面，返回 typed result；程序错误记录堆栈并走全局故障处理。</p>
+
+<h2 id="source">6. 图源路线与自定义图源规范</h2>
+<div class="table-wrap"><table><thead><tr><th>来源</th><th>开发安排</th><th>能力与限制</th></tr></thead><tbody>
+<tr><td>本地文件/文件夹</td><td>P0必须，作为离线基线</td><td>文件选择、递归可选、限制符号链接循环、分批扫描、增量去重。FileSystemWatcher事件合并；溢出后重新扫描，不将每个事件视为最终状态。</td></tr>
+<tr><td>HTTPS图片直链</td><td>P0必须</td><td>一次解析一张图片；定期刷新可选；类型、重定向、字节和解码校验；不执行远端脚本。</td></tr>
+<tr><td>JSON清单</td><td>P0必须</td><td>最稳定的用户扩展能力；明确协议版本、限制条目数和大小；清单只有数据，不下载插件代码。</td></tr>
+<tr><td>Bing每日图</td><td>P0可选适配器；发布前条款核验</td><td>社区使用HPImageArchive；地区、日期、原图可用性可能变化。仅当实际取得并解码到足够尺寸才标UHD；“请求_UHD”不能证明获得UHD。默认启用与分发策略在发布前确认。</td></tr>
+<tr><td>Wallhaven</td><td>P0可选浏览适配器，P1在线搜索</td><td>只请求SFW；保留作者和原页链接；API密钥由用户自带并安全保存。官方帮助页此前调研受403限制，实际配额、字段及国内网络体验需要联调核验，不能承诺固定限额。</td></tr>
+<tr><td>Wikimedia Commons</td><td>P1/P2精选列表</td><td>优先固定类别/策展清单；Imageinfo元数据保留具体许可、署名与来源。不同图片许可不同，不统一称“无版权”。</td></tr>
+<tr><td>Unsplash / Pexels</td><td>排除官方API内置壁纸供给路线</td><td>官方API规则限制壁纸用途/竞品式用途；不因“免费图片”就认为可以搭建同类壁纸产品。</td></tr>
+</tbody></table></div>
+<h3>6.1 JSON清单v1示例</h3>
+<pre><code>{
+  "schemaVersion": 1,
+  "name": "我的风景",
+  "items": [{
+    "id": "dune-001",
+    "title": "晨光中的沙丘",
+    "originalUrl": "https://images.example.org/dune.jpg",
+    "previewUrl": "https://images.example.org/dune-small.jpg",
+    "width": 3840, "height": 2160,
+    "author": "摄影者姓名",
+    "sourcePage": "https://example.org/photos/dune-001",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "tags": ["风景", "沙丘"]
+  }]
+}</code></pre>
+<p>示例地址为占位，不提供真实内容。首版清单上限建议2MB/5000项，图片上限建议50MB/6000万像素，可在后续根据使用情况调整。原图路径必须HTTPS；可选预览；尺寸只是声明，下载后以解码结果为准；重复ID拒绝并报告行/条目。v1不支持分页清单、自定义正则、任意JavaScript、任意请求头；未来添加能力通过 schemaVersion 迁移。</p>
+<p>首版HTTPS自定义源默认拒绝loopback、link-local和私网地址，且每次重定向重新检查，防止网络清单触发本机管理端口访问；本地图片走文件选择器。需要局域网NAS图源时另设计用户明确启用的专用能力。认证令牌不放入清单/明文配置；用Credential Locker或当前用户DPAPI保存，日志脱敏。</p>
+<h3>6.2 适配器生命周期</h3>
+<p>每个适配器声明能力，页面根据能力显示筛选/搜索入口，避免所有图源强行使用一套参数。同步只更新元数据与按需预览；原图用户触发时下载。移除图源采用软删除：已收藏、已下载和当前桌面保持可用，新推荐与同步排除该源。P0扩展方式是数据图源；新网站需要开发者增加编译期适配器。</p>
+
+<h2 id="data">7. 数据库设计与文件目录</h2>
+<p>候选SQLite DDL已提供于 <a href="database-schema.sql">database-schema.sql</a>，包含外键、活动下载唯一约束、每日选择唯一约束和版本号。它是待集成的设计稿，不应在每次启动直接执行。</p>
+<div class="table-wrap"><table><thead><tr><th>表</th><th>职责与关键约束</th></tr></thead><tbody>
+<tr><td>sources / wallpapers / variants</td><td>图源配置、去重元数据、原图/预览地址；(source_id,remote_id)唯一。尺寸缺失允许NULL；过期地址重新解析。</td></tr>
+<tr><td>assets / wallpaper_assets</td><td>实际校验后文件、哈希与像素；原图/缩略图/应用文件分层。相同内容可供多个条目引用。</td></tr>
+<tr><td>favorites / daily_selections</td><td>收藏；(profile_id,local_date)唯一记录当天推荐，revision记录主动更换。时区为审计元数据，避免同日变更时区重复推荐。</td></tr>
+<tr><td>download_jobs / export_records</td><td>可恢复任务和用户导出记录分开；同variant最多一个活动下载；导出文件不归缓存清理所有。</td></tr>
+<tr><td>apply_runs / apply_targets / asset_pins</td><td>逐屏应用与恢复快照；当前使用/待恢复/在操作文件受保护，无法被LRU扫除。</td></tr>
+<tr><td>app_settings</td><td>版本化设置JSON；单项验证，默认值兼容；不保存明文密钥。</td></tr>
+</tbody></table></div>
+<pre><code>%LOCALAPPDATA%/Shijing/
+  data/wallpapers.db
+  originals/&lt;sha256&gt;.&lt;verified-extension&gt;
+  thumbnails/&lt;image-hash + size + recipe-version&gt;.jpg
+  applied/&lt;render-hash&gt;.jpg       当前桌面及恢复引用文件
+  staging/&lt;job-id&gt;.part          未完成下载/导出临时文件
+  logs/                         滚动诊断日志
+用户选择的导出目录/                原始字节的额外副本</code></pre>
+<p>数据库存相对托管路径，导出记录才存外部完整路径。文件系统与数据库不是一个事务：先写临时文件并校验、同卷原子移动，再提交ready资产；若中途崩溃，启动reconciliation处理孤立文件、missing引用和未完成任务。迁移前备份数据库，按user_version顺序迁移；WAL状态备份用SQLite备份API，不能简单复制正在写入的主db文件。</p>
+
+<h2 id="download">8. 下载、保存、缓存与任务状态</h2>
+<pre><code>Queued → Resolving → Transferring → Verifying → Committing → Completed
+   任意允许阶段 → Cancelled / Failed（错误码、重试次数、重试时间）
+
+Acquire流程：命中ready原图 → 直接返回
+否则：重新解析地址 → 流式下载.part → 校验类型与解码 → SHA256
+    → 移动托管文件 → 事务更新asset/job → 返回LocalAsset
+Export流程：LocalAsset → 用户选目标 → 同目录临时复制 → 原子提交 → 导出记录</code></pre>
+<p>HttpClient由IHttpClientFactory管理，使用ResponseHeadersRead流式写盘；不把整个原图放进byte[]。默认全局原图并发2、预览并发4、解码并发2，均为待压测的初值。总超时与无数据超时分开；CancellationToken传到网络、文件和校验。取消后清理.part与job状态；只有最终提交完成才显示100%和成功。</p>
+<p>重试限网络暂时失败、408、429、部分5xx，最多3次并指数退避加抖动；尊重Retry-After。401/403需要用户操作，404/失效签名先重新解析一次，磁盘不足/坏图不盲重试。首版中断后重新下载；P1仅在服务器支持Range、ETag/If-Range且本地部分文件匹配时续传。</p>
+<p>同一原图的重复请求共享任务。每个调用方可取消自己的等待；只有全部消费者取消才停止共享下载，防止关闭详情页取消了“设为壁纸”正在依赖的任务。跨进程活动下载用数据库唯一索引和互斥锁共同保护；退出时执行受限时长的取消与状态落盘。</p>
+<p>下载前检查状态码、Content-Type与Content-Length；下载过程中继续限制累计字节；下载后检查文件签名与实际解码像素，识别返回HTML的“图片地址”和截断文件。远端文件名不能决定本地路径。原图按哈希命名、保留原字节，不重新压缩。</p>
+<p>缩略图使用LRU、默认1GB上限；原图另显示占用并提供明确管理，首版不自动删除用户主动下载/导入的原图。当前应用文件及恢复窗口内文件pin保护。应用文件只在下次成功替换并确认没有其他屏幕引用后解除pin；恢复快照最多保留最近一次或设定期限，避免无限占用。</p>
+
+<h2 id="desktop">9. Windows桌面与多显示器实现</h2>
+<p>采用 <a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-idesktopwallpaper">IDesktopWallpaper</a>，在独立STA线程创建与使用COM实例。SetWallpaper接收本地完整路径与显示器设备路径；monitorID为NULL时可统一设置所有屏幕。每次应用前重新枚举显示器，不能仅依据旧的“屏幕2”编号。</p>
+<p><strong>关键限制：</strong><a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-idesktopwallpaper-setposition">SetPosition</a>不接收monitorID，适配方式是全局设置。首版允许各屏选择不同图片，但“填充/适应/居中/跨屏”会统一影响屏幕；界面必须明确说明。“跨屏”选择时目标强制为所有显示器。每屏不同裁剪方式作为P1，预先生成对应屏幕像素尺寸的派生图再应用，原图独立保存。</p>
+<ol><li>解析目标设备路径、验证仍连接；获取真实原图并读取尺寸、EXIF方向。</li><li>准备系统可读JPEG/PNG应用文件，必要时将不受稳定支持格式转为派生文件。透明PNG合成到明确背景色；不改动原始文件。</li><li>读取现有每屏路径与全局position，创建apply_run、apply_targets及pin，写入待操作状态。</li><li>串行设置全局position与各目标屏幕的本地文件，记录HRESULT/逐屏结果。</li><li>全部成功则提交当前桌面状态；部分失败显示具体屏幕与恢复按钮。恢复先恢复全局position及受影响各屏路径。</li><li>日志与UI将恢复失败单独标记；Explorer重启/外部桌面工具切换后按系统实际状态重新对账。</li></ol>
+<p>这不是Windows提供的原子事务：其他程序可能同时修改壁纸，原路径可能不可读，显示器可能热拔插。因此恢复是尽力执行，不承诺百分之百还原。仅在已知旧文件仍可用时显示恢复可用；按实际成功屏幕报告，不显示误导性的“所有屏幕已完成”。COM接口定义、HRESULT和字符串内存释放必须审查。</p>
+<p>P0验证桌面设置；锁屏走另一套API与能力检查，后续单独设计，不把桌面成功推断为锁屏也成功。兼容回退到SystemParametersInfo时明确只有全局简单设置，不能伪装多屏成功。当前用户桌面操作无需管理员权限。</p>
+
+<h2 id="daily">10. 每日推荐与P1自动更换</h2>
+<p><strong>每日推荐</strong>是内容选择；<strong>每日自动更换</strong>是独立、用户选择开启的桌面操作。首版推荐默认不会修改桌面。每日推荐由本地策略实现，不需要AI或服务器：当前启用图源 → 合适候选 → 排除不适合/近期重复 → 日期稳定选择 → 持久化。</p>
+<ol><li>启动先查询当前用户本地日历日期的daily_selection。存在且条目可用则返回，刷新页面不更换。</li><li>不存在时从启用且未删除图源收集候选：Bing按来源日期，其他源按质量/横竖比/历史去重。原尺寸未知可候选，但不显示虚假高清标签。</li><li>优先匹配主屏比例与足够分辨率的图片；排除最近30天已推荐项，候选不足时逐步放宽并记录reason。</li><li>一次事务写入唯一日记录；并发创建遇冲突后读取已有结果。随机选择器带可测试种子，但最终记录是事实来源。</li><li>断网时使用已下载/本地候选；仅缓存到旧推荐时明确显示“最近可用”，不称为今天的Bing图。</li><li>“换一张”是显式操作，更新同日revision；浏览其他图片详情不修改今日推荐。</li></ol>
+<p>系统时间回拨时保留已记录日期选择，检测异常并在重新进入正常日期后再评估。跨时区根据本地日历日期处理，time_zone_id只作审计，不能作为当日唯一键的一部分。首次无内容显示导入入口，而不是无限加载。</p>
+<h3>P1后台策略</h3>
+<p>推荐独立的一次性Worker配合当前用户Task Scheduler的登录/每天触发器；登录后的后台运行必须在交互用户会话，不用SYSTEM设置其他人的桌面。不要依赖关闭后的应用内Timer。Worker调用共享用例，执行后退出；休眠后启动时比较最后执行日期，合并补偿一次，不补执行多天历史任务。</p>
+<p>自动开关默认关闭，用户开启时注册任务；关闭/卸载删除任务。二进制安装在稳定位置，升级不留下失效路径；参数正确引用带空格路径。主应用与Worker共享锁。当天手动设置成功后记录ManualOverride(local_date)，自动更换跳过当天；失败不能标记override。电池/计费网络策略可设为“只使用已有原图”，无合适内容则静默跳过并记录原因。</p>
+
+<h2 id="quality">11. 高清、性能与可靠性目标</h2>
+<p>高清来自真实原图、适配算法与显示策略。以实际解码宽高显示尺寸；4K/UHD标签须有明确阈值，3840×2160只是16:9示例，竖屏用实际尺寸说明。小图放大只提示“原图低于屏幕分辨率”，不称提升到4K。保存原字节，设置桌面用派生图，避免多次有损编码。</p>
+<p>一张3840×2160 BGRA解码约31.6MiB，100张约3.09GiB，不能把整个图库的原图全部解码到内存。图库按卡片可见宽度×DPI生成/解码缩略图；数据分页与UI虚拟化都需要，使用GridView时避免外层ScrollViewer破坏虚拟化。详情仅保留当前图及小量预取，离开页面释放不再使用的Bitmap。</p>
+<div class="table-wrap"><table><thead><tr><th>指标</th><th>首版目标（需实测）</th><th>测试方法</th></tr></thead><tbody>
+<tr><td>启动与响应</td><td>本地有缓存的冷启动到可交互≤2.5秒；收藏/导航反馈≤100ms；无网络等待阻塞UI</td><td>Windows11、4核CPU、8GB内存、SSD、1080p/150%DPI；Release构建，至少10次记录P50/P95与机器配置。</td></tr>
+<tr><td>图库滚动</td><td>1000条记录下持续滚动尽量接近显示刷新率，60Hz目标帧预算约16.7ms；无超过100ms的明显UI停顿</td><td>真实4K图与缩略图对照；WPA/ETW或VS Profiler定位UI、解码、磁盘。</td></tr>
+<tr><td>内存</td><td>普通图库PrivateBytes目标≤250MiB；单张4K详情≤400MiB；长时切页无持续上升</td><td>同一机器/数据集运行10分钟、切图100次；区分私有内存与工作集。</td></tr>
+<tr><td>后台</td><td>静态桌面设置后没有持续渲染；空闲不持续占用CPU；Worker完成后退出</td><td>关闭主窗口、断网、休眠恢复、24小时观察；记录唤醒频次。</td></tr>
+<tr><td>数据安全</td><td>下载中断不出现ready坏文件；清缓存不删除当前桌面、导出文件或本地源文件</td><td>取消、强制结束、磁盘满、文件丢失和故障注入后启动对账。</td></tr>
+</tbody></table></div>
+<p>上表是预算和验收目标，不是本次原型测量结果。性能未达标先降解码尺寸/并发、减少材质，再优化热点；不能通过隐藏真实原图尺寸满足指标。EXIF方向在预览与应用派生图一致处理；sRGB作为首版一致性基线，广色域/HDR屏幕需单独实测，不承诺跨配置色彩完全一致。</p>
+
+<h2 id="delivery">12. 打包、开源与发布</h2>
+<p>建议新代码采用MIT，第三方依赖和素材分别列入NOTICE / ThirdPartyNotices。只借鉴未获许可代码的思路，不整段复制；若使用MPL文件保持对应文件义务；不把GPL核心直接拷入宣称全MIT的应用。软件许可证与照片授权是两件事，来源条款/署名字段始终保留。</p>
+<p>首版优先GitHub Releases用户级安装器；WinUI 3采用unpackaged部署，明确.NET与Windows App SDK运行时是否自包含，避免“装好但缺运行时”。安装后稳定路径适配Worker，卸载时取消任务并询问是否保留应用数据。先验证空白Windows VM安装，再确定包体预算。MSIX/Store为后续渠道，不能假定当前任务计划注册方式原样可用。</p>
+<p>CI运行还原锁定依赖、构建、应用层与集成测试，产出x64 Release安装包与SHA256；每次发布有更新记录和已知限制。首版更新入口检查版本并引导用户下载，不静默替换运行中程序；自动更新后续加入签名和回滚。发布签名证书需要维护者单独决定，开发可行性不依赖购买证书。</p>
+<p>默认无遥测、无登录；用户主动发送诊断时先预览导出内容。日志去掉API key、签名URL查询参数、完整私人路径，滚动保存，建议7天或20MB上限。网络请求只发往用户启用的源与明确配置的版本检查地址。</p>
+
+<h2 id="schedule">13. 开发排期、任务拆分与依赖</h2>
+<p>假设1名熟悉C#/WinUI开发者、每周5天，P0约30–40人日（6–8周），P1另加8–12人日。若第一次使用WinUI或多屏/安装问题较多，按8–10周安排P0更稳妥。这是工程估算，不是固定交付承诺；额外时间用于真实环境联调和修复。</p>
+<div class="table-wrap"><table><thead><tr><th>阶段/任务</th><th>前端工作</th><th>本地后端工作</th><th>依赖与产物</th><th>估算</th></tr></thead><tbody>
+<tr><td>M0 / FND-01</td><td>应用壳、主题、导航、临时数据卡片</td><td>锁定SDK；DI/日志；空白VM部署验证；COM设置单屏技术探针</td><td>先证明WinUI安装和桌面接口可用；确定版本与发布方式</td><td>3–4日</td></tr>
+<tr><td>M1 / DATA-01</td><td>图库列表、空态、收藏交互</td><td>数据库迁移、仓储、托管目录、图像校验、导入与缩略图</td><td>依赖M0；本地导入→详情→设置桌面最小纵向闭环</td><td>5–6日</td></tr>
+<tr><td>M2 / NET-01</td><td>图源表单、测试结果、同步状态</td><td>HTTPS直链、JSON清单、限制验证；可选Bing/Wallhaven适配</td><td>依赖M1与来源条款判断；不让第三方API阻塞本地图源</td><td>4–6日</td></tr>
+<tr><td>M3 / DL-01</td><td>下载进度、取消、重试、导出、已下载图库</td><td>流式下载、共享任务去重、原子提交、导出、启动对账、缓存保护</td><td>依赖M1/M2；断网/坏图/磁盘满结果可验证</td><td>5–6日</td></tr>
+<tr><td>M4 / DESK-01</td><td>显示器选择、全局适配说明、逐屏结果/恢复</td><td>STA COM、多屏枚举、快照、派生文件、pin、部分失败</td><td>依赖M3；双屏/竖屏/热拔插实机记录</td><td>4–5日</td></tr>
+<tr><td>M5 / UX-01</td><td>今日、近期、筛选、沉浸详情、主题/存储设置</td><td>稳定每日选择、去重复、离线回退、设置验证</td><td>依赖M1–M4；P0功能冻结</td><td>4–5日</td></tr>
+<tr><td>M6 / REL-01</td><td>键盘/可访问性/DPI、加载和错误细节</td><td>性能压测、迁移恢复、安装卸载、CI、许可与发布说明</td><td>依赖功能冻结；P0候选发布版本</td><td>5–8日</td></tr>
+<tr><td>P1 / AUTO-01</td><td>自动更换、托盘、策略与失败历史</td><td>Worker、计划任务、互斥、手动override、休眠补偿</td><td>P0可用后再开始；自动功能默认关闭</td><td>5–7日</td></tr>
+<tr><td>P1 / ADV-01</td><td>每屏裁剪/在线搜索</td><td>派生图策略、服务器查询、地址失效刷新、ARM64验证</td><td>按优先级独立发布，工期随范围重新估算</td><td>3–5日以上</td></tr>
+</tbody></table></div>
+<p>两人开发时可在M1之后分别负责页面/ViewModel与服务/仓储，但先约定契约和状态，不能简单把UI当作最后一周的皮肤。关键路径为：部署/COM探针 → 本地闭环 → 下载校验 → 多屏应用 → 稳定推荐 → 发布验收。每日推荐先用本地候选跑通，再接在线源。</p>
+<h3>每个任务的完成定义</h3>
+<p>功能代码、明确异常状态、相关测试或实机记录、文档/许可更新以及可运行演示都完成才关闭任务。原型只用于评审布局和流程，不作为“功能完成”的证据。首次迭代直接从M0开始，无需先购买服务器或签名证书。</p>
+
+<h2 id="acceptance">14. 验收矩阵与测试策略</h2>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>用例</th><th>验收结果</th><th>方法</th></tr></thead><tbody>
+<tr><td>A01</td><td>同日重启、刷新、浏览详情</td><td>今日推荐保持不变；主动换一张才增加revision；时区同日变动不重复创建</td><td>可替换Clock的应用层测试</td></tr>
+<tr><td>A02</td><td>首次启动断网 / 图源全部关闭</td><td>显示明确空态与导入入口；已有原图可查看与设置</td><td>集成 + 手工</td></tr>
+<tr><td>A03</td><td>重复下载、取消、未知长度、崩溃</td><td>同原图最多一份活动任务；取消等待不误停其他消费者；残留part可修复；完成前不报成功</td><td>模拟HTTP/文件系统故障</td></tr>
+<tr><td>A04</td><td>200返回HTML、截断图、超大尺寸、429</td><td>校验失败不入ready资产；429按RetryAfter；不会卡UI</td><td>本地HTTP测试替身</td></tr>
+<tr><td>A05</td><td>保存/取消保存、目录拒绝、磁盘满</td><td>原字节SHA256一致；取消不记导出；可换目录；不会留下损坏最终文件</td><td>文件集成测试</td></tr>
+<tr><td>A06</td><td>双屏横竖混合、选单屏、跨屏</td><td>目标设备匹配；全局position提示准确；原图不改写；跨屏目标是所有屏幕</td><td>实机 Windows测试</td></tr>
+<tr><td>A07</td><td>应用中拔屏 / COM失败 / 恢复失败</td><td>逐屏Success/Failure；保留现状与恢复能力；不误报全部完成</td><td>接口故障注入 + 实机</td></tr>
+<tr><td>A08</td><td>清缓存 / 图源移除 / 原始文件删除</td><td>当前桌面与导出/本地源受保护；图源移除保留已下载；丢失文件可识别</td><td>数据库 + 文件集成</td></tr>
+<tr><td>A09</td><td>JSON错误、重复ID、非法协议/重定向</td><td>字段错误可定位；拒绝危险地址；源诊断不影响其他源</td><td>适配器单元/集成</td></tr>
+<tr><td>A10</td><td>1000条图库，DPI100/150/200%，文本200%</td><td>不加载所有原图；控件不裁切；操作可键盘完成；焦点与读屏名称明确</td><td>性能录制 + Accessibility Insights</td></tr>
+<tr><td>A11</td><td>新VM安装、升级、卸载、旧数据库迁移</td><td>无缺运行时；路径稳定；迁移可恢复；卸载不删除用户导出文件</td><td>Windows10/11 VM矩阵</td></tr>
+<tr><td>A12</td><td>P1自动任务、睡眠补偿、手动设置</td><td>默认关闭；在用户会话执行一次；同日手动覆盖保护；关闭/卸载清任务</td><td>真实计划任务与系统时间场景</td></tr>
+</tbody></table></div>
+<p>单元测试围绕日期、去重、状态、保护引用等业务不变量；集成测试用临时SQLite和确定性网络响应；Windows桌面测试仅在明确专用VM或测试账户上运行，不在普通CI上改用户壁纸。在线API联调测试单独标记，避免网络不稳定导致主CI随机失败。每次测试记录SDK/OS/屏幕与日志，失败路径和成功路径同样纳入验收。</p>
+
+<h2 id="references">15. GitHub实现参考与证据边界</h2>
+<p>以下沿用前次源码调研；SHA用于固定证据，实际开发前仍需检查分支、许可与依赖更新。参考项目不是承诺可直接复用的底座。</p>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>借鉴内容</th><th>许可 / 固定调研提交</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/hippieZhou/BinggoWallpapers">BinggoWallpapers</a></td><td>WinUI分层、GridView增量加载、SQLite、流式下载及并发控制；已查看调用链未确认桌面设置，不能据此声称整个项目没有该功能。</td><td>MIT<br/><a href="https://github.com/hippieZhou/BinggoWallpapers/tree/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2">cd179f3</a></td></tr>
+<tr><td><a href="https://github.com/gvastethecreator/waller">waller</a></td><td>WinUI/C#、IDesktopWallpaper、多屏设备路径与派生图；注意适配position全局影响和逐屏失败。</td><td>MIT<br/><a href="https://github.com/gvastethecreator/waller/tree/bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03">bf8cf5f</a></td></tr>
+<tr><td><a href="https://github.com/t1m0thyj/WinDynamicDesktop">WinDynamicDesktop</a></td><td>静态图按时间切换、系统睡眠/会话事件；借鉴生命周期设计，不把WinForms界面直接迁移。</td><td>MPL-2.0<br/><a href="https://github.com/t1m0thyj/WinDynamicDesktop/tree/d1807df627ff04c9322701604181fd399541f1dc">d1807df</a></td></tr>
+<tr><td><a href="https://github.com/lively-community/lively">Lively</a></td><td>WinUI界面与核心隔离思路；动态播放器/gRPC多进程并非本项目首版需要。</td><td>GPL-3.0<br/><a href="https://github.com/lively-community/lively/tree/25a0a5f4ed1988ff42117d3a17feb321062237fe">25a0a5f</a></td></tr>
+<tr><td><a href="https://github.com/pyprism/Bing-Wallpaper">Bing-Wallpaper</a></td><td>UHD不可用回退、下载后校验、原子保存、当天手动保护；Qt实现只参考策略。</td><td>MIT<br/><a href="https://github.com/pyprism/Bing-Wallpaper/tree/2ef46bc7b0f01733a48dcbe9ec8cfcdecb2af66b">2ef46bc</a></td></tr>
+<tr><td><a href="https://github.com/xyanwert/wallhaven-fetcher-windows">wallhaven-fetcher-windows</a></td><td>source适配器、Wallhaven查询与配置；研究思路，不复制受个人/非商业条款限制的代码。</td><td>非通用宽松开源许可<br/><a href="https://github.com/xyanwert/wallhaven-fetcher-windows/tree/ebed07b980662eb7013afc6c2fa162686c963673">ebed07b</a></td></tr>
+</tbody></table></div>
+<p>官方资料：<a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-idesktopwallpaper-setwallpaper">SetWallpaper参数与路径</a>、<a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-idesktopwallpaper-setposition">全局SetPosition</a>、<a href="https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/items-repeater">ItemsRepeater与集合控件选择</a>、<a href="https://learn.microsoft.com/en-us/windows/apps/develop/ui/in-app-acrylic">应用内Acrylic</a>、<a href="https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads">Windows App SDK版本</a>、<a href="https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core">.NET支持周期</a>。</p>
+<p>图源规则：<a href="https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines">Unsplash API规则</a>、<a href="https://help.pexels.com/hc/en-us/articles/4405588861721-Can-I-use-the-API-as-a-wallpaper-app">Pexels壁纸API说明</a>、<a href="https://wallhaven.cc/help/api">Wallhaven API</a>、<a href="https://www.mediawiki.org/wiki/API:Imageinfo">Commons Imageinfo</a>、<a href="https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia">Commons内容复用要求</a>。需要发布前重新核验，网络可访问性与图片许可不能仅由源码推断。</p>
+
+<h2>16. 交付内容与下一步</h2>
+<p>本次交付：本开发方案、五页两种布局可交互UI预览、可执行验证的SQLite候选结构。预览证明布局与本地交互逻辑，不能证明WinUI渲染效果、实时图源、4K质量或桌面接口成功；原型未进行Windows应用像素渲染验收。</p>
+<p>建议从M0技术探针开始实施：确认WinUI启动与安装，导入一张本地图片，显示缩略图和真实尺寸，通过IDesktopWallpaper设置主屏并能恢复。这个小闭环验证后，按M1–M6推进。图源条款、在线可用性和自动任务打包方式是具体开发/发布关卡，不影响本地闭环先行。</p>
+<p class="muted">关联前期材料：工作区根目录《Windows壁纸软件-可行性分析报告.html》与research/evidence-2026-10-08.json。</p>
+</main></body></html>

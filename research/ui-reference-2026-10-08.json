@@ -1,0 +1,31 @@
+{
+  "checkedOn": "2026-10-08",
+  "scope": "D09: WinUI 3 sidebar, native contextual commands and transitions",
+  "method": "Read relevant upstream sample sections and official API documentation via web; no source code vendoring or new dependency.",
+  "references": [
+    {
+      "source": "Microsoft WinUI Gallery / SplitViewPage.xaml",
+      "url": "https://github.com/microsoft/WinUI-Gallery/blob/main/WinUIGallery/Samples/SplitView/SplitViewPage.xaml",
+      "readUrl": "https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Samples/SplitView/SplitViewPage.xaml",
+      "symbols": ["SplitView", "SplitView.Pane", "IsPaneOpen"],
+      "finding": "A mounted SplitView contains pane and content. IsPaneOpen controls the pane; the sample does not remove the entire control on close.",
+      "application": "SettingsDrawer retains its SplitView and pane root. Inline mode is a local choice because the wallpaper is a sibling; the content is a dismiss surface rather than the photo."
+    },
+    {
+      "source": "Microsoft WinUI Gallery / ListViewPage.xaml",
+      "url": "https://github.com/microsoft/WinUI-Gallery/blob/main/WinUIGallery/Samples/ListView/ListViewPage.xaml",
+      "readUrl": "https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Samples/ListView/ListViewPage.xaml",
+      "symbols": ["Grid.ContextFlyout", "MenuFlyout", "ListView.ItemTemplate"],
+      "finding": "The collection item template attaches a native MenuFlyout through ContextFlyout.",
+      "application": "PictureCommands builds native commands for photo surfaces and realized gallery containers. Recycled containers receive a fresh item-specific target."
+    },
+    {
+      "source": "Microsoft Learn / EntranceThemeTransition",
+      "url": "https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.media.animation.entrancethemetransition?view=windows-app-sdk-1.8",
+      "symbols": ["EntranceThemeTransition", "FromVerticalOffset", "IsStaggeringEnabled"],
+      "finding": "The framework provides entrance animation with configurable offsets and staggering.",
+      "application": "Only view chrome and drawer content receive an 8 DIP entrance. Background images are prepared before view replacement and do not fade from an empty backdrop."
+    }
+  ],
+  "verificationBoundary": "Current source patterns inspected; not a repository-wide review, upstream revision pin, frame-time benchmark or physical mouse end-to-end test. Product verification is recorded in docs/context/NOW.md."
+}

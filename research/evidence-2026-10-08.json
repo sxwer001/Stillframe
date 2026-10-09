@@ -1,0 +1,247 @@
+{
+  "checkedOn": "2026-10-08",
+  "timezone": "Asia/Hong_Kong",
+  "method": "GitHub repository metadata, default-branch commit snapshots, selected source files and official documentation. No application builds or end-to-end network/desktop tests.",
+  "repositories": [
+    {
+      "repository": "hippieZhou/BinggoWallpapers",
+      "url": "https://github.com/hippieZhou/BinggoWallpapers",
+      "stars": 3,
+      "license": "MIT",
+      "defaultBranch": "main",
+      "archived": false,
+      "pushedAtUTC": "2026-10-08T06:52:03Z",
+      "commit": "cd179f3e765e26c8d4e4d5d01eed2112f1936ba2",
+      "commitDateUTC": "2026-10-08T06:52:02Z",
+      "inspectedFiles": [
+        {
+          "path": "src/BinggoWallpapers.Core/Http/Network/Impl/BingWallpaperClient.cs",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.Core/Http/Network/Impl/BingWallpaperClient.cs",
+          "characters": 4879
+        },
+        {
+          "path": "src/BinggoWallpapers.Core/Http/Network/Impl/ImageDownloadClient.cs",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.Core/Http/Network/Impl/ImageDownloadClient.cs",
+          "characters": 10925
+        },
+        {
+          "path": "src/BinggoWallpapers.Core/Http/Services/Impl/BingWallpaperService.cs",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.Core/Http/Services/Impl/BingWallpaperService.cs",
+          "characters": 6031
+        },
+        {
+          "path": "src/BinggoWallpapers.WinUI/ViewModels/DetailViewModel.cs",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.WinUI/ViewModels/DetailViewModel.cs",
+          "characters": 6479
+        },
+        {
+          "path": "src/BinggoWallpapers.WinUI/ViewModels/HomeViewModel.cs",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.WinUI/ViewModels/HomeViewModel.cs",
+          "characters": 4679
+        },
+        {
+          "path": "src/BinggoWallpapers.WinUI/Views/HomePage.xaml",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.WinUI/Views/HomePage.xaml",
+          "characters": 7709
+        },
+        {
+          "path": "src/BinggoWallpapers.WinUI/BinggoWallpapers.WinUI.csproj",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.WinUI/BinggoWallpapers.WinUI.csproj",
+          "characters": 4317
+        },
+        {
+          "path": "Directory.Packages.props",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/Directory.Packages.props",
+          "characters": 5350
+        },
+        {
+          "path": "LICENSE.txt",
+          "url": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/LICENSE.txt",
+          "characters": 1067
+        }
+      ]
+    },
+    {
+      "repository": "gvastethecreator/waller",
+      "url": "https://github.com/gvastethecreator/waller",
+      "stars": 3,
+      "license": "MIT",
+      "defaultBranch": "main",
+      "archived": false,
+      "pushedAtUTC": "2026-09-01T17:35:56Z",
+      "commit": "bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03",
+      "commitDateUTC": "2026-09-01T17:34:12Z",
+      "inspectedFiles": [
+        {
+          "path": "native/Waller.Native.Core/Windows/DesktopWallpaperComWriter.cs",
+          "url": "https://github.com/gvastethecreator/waller/blob/bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03/native/Waller.Native.Core/Windows/DesktopWallpaperComWriter.cs",
+          "characters": 515
+        },
+        {
+          "path": "native/Waller.Native.Core/Windows/DesktopWallpaperInterop.cs",
+          "url": "https://github.com/gvastethecreator/waller/blob/bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03/native/Waller.Native.Core/Windows/DesktopWallpaperInterop.cs",
+          "characters": 8033
+        },
+        {
+          "path": "native/Waller.Native.Core/Sessions/WallpaperApplyService.cs",
+          "url": "https://github.com/gvastethecreator/waller/blob/bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03/native/Waller.Native.Core/Sessions/WallpaperApplyService.cs",
+          "characters": 6041
+        },
+        {
+          "path": "native/Waller.Native.Core/Rendering/BasicPngWallpaperRenderer.cs",
+          "url": "https://github.com/gvastethecreator/waller/blob/bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03/native/Waller.Native.Core/Rendering/BasicPngWallpaperRenderer.cs",
+          "characters": 2392
+        },
+        {
+          "path": "native/Waller.Native.App/Waller.Native.App.csproj",
+          "url": "https://github.com/gvastethecreator/waller/blob/bf8cf5f40a5f2085d2fe894c110f9ec721d8eb03/native/Waller.Native.App/Waller.Native.App.csproj",
+          "characters": 4218
+        }
+      ]
+    },
+    {
+      "repository": "t1m0thyj/WinDynamicDesktop",
+      "url": "https://github.com/t1m0thyj/WinDynamicDesktop",
+      "stars": 5039,
+      "license": "MPL-2.0",
+      "defaultBranch": "main",
+      "archived": false,
+      "pushedAtUTC": "2026-10-06T10:44:35Z",
+      "commit": "d1807df627ff04c9322701604181fd399541f1dc",
+      "commitDateUTC": "2026-10-06T10:44:30Z",
+      "inspectedFiles": [
+        {
+          "path": "src/WallpaperApi.cs",
+          "url": "https://github.com/t1m0thyj/WinDynamicDesktop/blob/d1807df627ff04c9322701604181fd399541f1dc/src/WallpaperApi.cs",
+          "characters": 2168
+        },
+        {
+          "path": "src/EventScheduler.cs",
+          "url": "https://github.com/t1m0thyj/WinDynamicDesktop/blob/d1807df627ff04c9322701604181fd399541f1dc/src/EventScheduler.cs",
+          "characters": 11503
+        },
+        {
+          "path": "src/WinDynamicDesktop.csproj",
+          "url": "https://github.com/t1m0thyj/WinDynamicDesktop/blob/d1807df627ff04c9322701604181fd399541f1dc/src/WinDynamicDesktop.csproj",
+          "characters": 3060
+        }
+      ]
+    },
+    {
+      "repository": "lively-community/lively",
+      "url": "https://github.com/lively-community/lively",
+      "stars": 19769,
+      "license": "GPL-3.0",
+      "defaultBranch": "core-separation",
+      "archived": false,
+      "pushedAtUTC": "2026-09-30T16:49:36Z",
+      "commit": "25a0a5f4ed1988ff42117d3a17feb321062237fe",
+      "commitDateUTC": "2026-09-29T15:54:12Z",
+      "inspectedFiles": [
+        {
+          "path": "src/Lively/Lively.UI.WinUI/Services/DiskCacheService.cs",
+          "url": "https://github.com/lively-community/lively/blob/25a0a5f4ed1988ff42117d3a17feb321062237fe/src/Lively/Lively.UI.WinUI/Services/DiskCacheService.cs",
+          "characters": 2939
+        },
+        {
+          "path": "src/Lively/Lively.UI.WinUI/Lively.UI.WinUI.csproj",
+          "url": "https://github.com/lively-community/lively/blob/25a0a5f4ed1988ff42117d3a17feb321062237fe/src/Lively/Lively.UI.WinUI/Lively.UI.WinUI.csproj",
+          "characters": 17516
+        }
+      ]
+    },
+    {
+      "repository": "pyprism/Bing-Wallpaper",
+      "url": "https://github.com/pyprism/Bing-Wallpaper",
+      "stars": 1,
+      "license": "MIT",
+      "defaultBranch": "master",
+      "archived": false,
+      "pushedAtUTC": "2026-09-26T07:30:19Z",
+      "commit": "2ef46bc7b0f01733a48dcbe9ec8cfcdecb2af66b",
+      "commitDateUTC": "2026-09-26T07:29:37Z",
+      "inspectedFiles": [
+        {
+          "path": "src/BingClient.cpp",
+          "url": "https://github.com/pyprism/Bing-Wallpaper/blob/2ef46bc7b0f01733a48dcbe9ec8cfcdecb2af66b/src/BingClient.cpp",
+          "characters": 15093
+        },
+        {
+          "path": "src/WallpaperSetter.cpp",
+          "url": "https://github.com/pyprism/Bing-Wallpaper/blob/2ef46bc7b0f01733a48dcbe9ec8cfcdecb2af66b/src/WallpaperSetter.cpp",
+          "characters": 6460
+        }
+      ]
+    },
+    {
+      "repository": "xyanwert/wallhaven-fetcher-windows",
+      "url": "https://github.com/xyanwert/wallhaven-fetcher-windows",
+      "stars": 0,
+      "license": "NOASSERTION",
+      "defaultBranch": "main",
+      "archived": false,
+      "pushedAtUTC": "2026-06-07T01:48:16Z",
+      "commit": "ebed07b980662eb7013afc6c2fa162686c963673",
+      "commitDateUTC": "2026-06-07T01:48:08Z",
+      "inspectedFiles": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/LICENSE",
+          "characters": 231
+        },
+        {
+          "path": "src/WallhavenFetcher/Sync/ISource.cs",
+          "url": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/src/WallhavenFetcher/Sync/ISource.cs",
+          "characters": 1475
+        },
+        {
+          "path": "src/WallhavenFetcher/Sync/WallhavenSource.cs",
+          "url": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/src/WallhavenFetcher/Sync/WallhavenSource.cs",
+          "characters": 7513
+        },
+        {
+          "path": "src/WallhavenFetcher/Sync/SyncEngine.cs",
+          "url": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/src/WallhavenFetcher/Sync/SyncEngine.cs",
+          "characters": 16569
+        },
+        {
+          "path": "src/WallhavenFetcher/Wallpaper/WallpaperRefresher.cs",
+          "url": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/src/WallhavenFetcher/Wallpaper/WallpaperRefresher.cs",
+          "characters": 1257
+        },
+        {
+          "path": "src/WallhavenFetcher/WallhavenFetcher.csproj",
+          "url": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/src/WallhavenFetcher/WallhavenFetcher.csproj",
+          "characters": 2174
+        }
+      ]
+    }
+  ],
+  "criticalFindings": [
+    {
+      "finding": "Binggo DetailViewModel implements download, export and effects; desktop setting chain not confirmed in inspected views and three code searches. README claims should not be treated as implementation verification.",
+      "source": "https://github.com/hippieZhou/BinggoWallpapers/blob/cd179f3e765e26c8d4e4d5d01eed2112f1936ba2/src/BinggoWallpapers.WinUI/ViewModels/DetailViewModel.cs"
+    },
+    {
+      "finding": "Wallhaven Fetcher personal-use license permits non-commercial distribution only; API metadata labels NOASSERTION.",
+      "source": "https://github.com/xyanwert/wallhaven-fetcher-windows/blob/ebed07b980662eb7013afc6c2fa162686c963673/LICENSE",
+      "licenseText": "Personal use license.\n\nCopyright (c) 2026 xyanwert\n\nThis software is provided \"as is\" for personal use. You may use, modify,\nand distribute it for non-commercial purposes. No warranty of any kind\nis provided. Use at your own risk.\n"
+    },
+    {
+      "finding": "Lively repository originally at rocksdanister/lively redirects to lively-community/lively.",
+      "source": "https://api.github.com/repos/rocksdanister/lively"
+    },
+    {
+      "finding": "Unsplash official guidelines expressly prohibit replicating core experience including wallpaper applications.",
+      "source": "https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines"
+    },
+    {
+      "finding": "Pexels official wallpaper API FAQ says wallpaper/gallery applications are not eligible, including personal or educational apps.",
+      "source": "https://help.pexels.com/hc/en-us/articles/4405588861721-Can-I-use-the-API-as-a-wallpaper-app"
+    },
+    {
+      "finding": "Wallhaven help/api retrieval returned HTTP 403 in research environment; quota and live regional reachability not verified.",
+      "source": "https://wallhaven.cc/help/api"
+    }
+  ]
+}

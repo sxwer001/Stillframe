@@ -1,0 +1,12 @@
+.tools/
+artifacts/
+**/bin/
+**/obj/
+.vs/
+*.user
+*.pfx
+*.p12
+*.key
+.env
+.env.*
+research/preview-validation/node_modules/

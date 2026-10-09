@@ -1,0 +1,57 @@
+{
+  "checkedOn": "2026-10-09",
+  "timezone": "Asia/Hong_Kong",
+  "scope": "Public source APIs and running-session automation; no publication review or system wallpaper mutation.",
+  "sources": [
+    {
+      "id": "bing-archive",
+      "type": "Third-party public archive; not a Microsoft-supported API",
+      "references": ["https://github.com/npanuhin/Bing-Wallpaper-Archive", "https://bing.npanuhin.me/CN-zh.min.json"],
+      "observed": "2026-10-09: CN metadata returned 919 dates from 2024-04-03 to 2026-10-08, 1220533 bytes. App excludes the most recent 14 days from historical selection to avoid duplicating the separate daily/recent feed: 906 candidates on this date.",
+      "implementation": "Bounded 2 MiB HTTPS metadata, in-process six-hour cache; random picks across eligible history, gallery pages contain 24 items. Download only the selected archived original. Original Bing URLs may return placeholders for old dates, so image bytes come from archive storage. Preserve date/copyright; archive code MIT does not license image redistribution.",
+      "validation": "../artifacts/validation/layout-v8/bing-archive-api.txt: 4 PASS, distinct pages, 2024 3840x2160 original WIC decode, unseen random historic original, daily cache isolation. No system mutation or user library access."
+    },
+    {
+      "id": "bing",
+      "type": "Community homepage endpoint, not a supported developer API contract",
+      "reference": "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8&mkt=zh-CN",
+      "implementation": "Keep copyright/source link, exclude explicit wp=false, use UHD original and separate preview. Access does not grant redistribution rights."
+    },
+    {
+      "id": "wallhaven",
+      "references": ["https://wallhaven.cc/help/api", "https://www.whvn.cc/help/api"],
+      "implementation": "Anonymous SFW search, weekly toplist/latest, encoded keyword and pagination. Search metadata does not identify photographer; preserve source page rather than invent attribution.",
+      "limits": "Official API documents 45 requests/minute; UI serializes operations and enforces a two-second per-source cooldown."
+    },
+    {
+      "id": "commons",
+      "reference": "https://www.mediawiki.org/wiki/API:Imageinfo",
+      "implementation": "Resolve recent Template:Potd/YYYY-MM-DD images via generator=images; imageinfo provides original/preview/mime/size/extmetadata. Accept JPEG/PNG, strip attribution markup and retain per-image license and source page."
+    },
+    {
+      "id": "unsplash",
+      "references": ["https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines", "https://unsplash.com/api-terms"],
+      "status": "Website link only; official API guidelines exclude wallpaper applications."
+    },
+    {
+      "id": "palace-museum",
+      "reference": "https://www.dpm.org.cn/",
+      "status": "Official homepage verified. No usable public wallpaper API established; website link only."
+    }
+  ],
+  "windows": [
+    {
+      "reference": "https://learn.microsoft.com/en-us/uwp/api/windows.system.userprofile.userprofilepersonalizationsettings?view=winrt-26100",
+      "implementation": "Probe IsSupported, app-owned unique copy, TrySetLockScreenImageAsync; false means failure, never change policies."
+    },
+    {
+      "references": ["https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/app-notifications-dotnet", "https://github.com/microsoft/WindowsAppSDK/blob/main/dev/AppNotifications/AppNotificationManager.cpp"],
+      "implementation": "Subscribe before Register, honor system notification setting, dispatch activation to UI thread and unregister on exit. Capability probes alone do not prove delivery."
+    }
+  ],
+  "validation": {
+    "record": "../artifacts/validation/home-v6/api-windows.txt",
+    "method": "Real app SafeHttp, native WIC decoding, own diagnostic libraries and byte-identical exports; network search/page checks; Bing daily and Wallhaven/Commons random home selection, at most one original per source. Final 18 PASS; diagnostic originals can be reused across runs.",
+    "excluded": "No user library access, desktop/lockscreen mutation or notification registration/display."
+  }
+}
