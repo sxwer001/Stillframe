@@ -4,7 +4,7 @@
 
 ## 当前目标
 
-按D16交付“拾景 · Stillframe”0.1.0 x64试用版：中文名与原图库目录保留，工程/命名空间使用Stillframe；提供自签名MSIX、公开CER、固定证书的安装脚本、便携ZIP和摘要。README已精简并加入真实原生截图，原创相册图标已用于EXE与MSIX。最终包复验通过，公开GitHub仓库已创建，源码和Release上传仍在执行，完成后定点更新下表。完整设计继续使用 [详细开发方案](../Windows壁纸软件-详细开发方案.html)，当前完成度以本文件为准。
+按D16已公开交付“拾景 · Stillframe”0.1.0 x64试用版：中文名与原图库目录保留，工程/命名空间使用Stillframe；[Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)提供自签名MSIX、公开CER、固定证书的安装脚本、便携ZIP和摘要。README已精简并加入真实原生截图，原创相册图标已用于EXE与MSIX。最终包复验和远端摘要核对通过；已清理限定生成目录，保留已安装试用版、授权的证书信任和用户图库。完整设计继续使用 [详细开发方案](../Windows壁纸软件-详细开发方案.html)，当前完成度以本文件为准。
 
 ## 当前进展
 
@@ -23,7 +23,7 @@
 | 手动锁屏 | 图片右键和详情更多菜单均可按需获取原图并调用既有Windows锁屏服务；当前只验证入口和编译，未修改用户锁屏 | [图片命令](../../src/Stillframe.App/PictureCommands.cs)、[Windows调用](../../src/Stillframe.App/Services/PersonalizationService.cs) |
 | 每日任务 | 默认关闭；运行中按执行小时检查，成功日期去重，失败15分钟重试。桌面/锁屏/通知分别启用，Windows效果未实测 | [调度](../../src/Stillframe.Core/DailyAutomation.cs)、[原生设置](../../src/Stillframe.App/AutomationView.cs)、[Windows调用](../../src/Stillframe.App/Services/PersonalizationService.cs) |
 | Release构建与试用包 | 已生成英文工程的0.1.0 x64 ZIP及自签名MSIX；保留第三方许可/NOTICE。MSIX额外携带resources.pri，修复安装后的主题字典加载问题；发布状态单列 | [MSIX方法](RUNBOOK.md#试用版msix与公开发布)、[交付映射](MAP.md#运行与部署位置) |
-| 生成文件清理 | 已删除21个限定目录，文件大小合计1088.7 MiB；源码、文档、SDK、Release/ZIP、报告/截图保留，用户图库不在清理范围内 | artifacts/validation/package-v01/cleanup.json；方法与保护见RUNBOOK |
+| 生成文件清理 | 本轮删除9个限定目录，文件大小合计805.3 MiB；源码、文档、SDK、Release/ZIP/MSIX、报告/截图保留，用户图库不在清理范围内 | artifacts/validation/release-v01/cleanup.json；方法与保护见RUNBOOK |
 | 基础上下文文档 | 已建立规则、索引、使用入口与专题分工 | [索引](../../PROJECT_INDEX.md)；当前检查状态见下表 |
 
 ## 验证状态
@@ -42,7 +42,7 @@
 | 实际桌面设置、多屏热拔插、恢复 | 已编写调用代码；没有实际修改/回滚桌面的通过证据，待手动验收 |
 | 安装/升级/卸载验证 | 已授权并通过UAC导入公开CER到LocalMachine/TrustedPeople，签名Valid。原创新图标最终MSIX卸载后重装成功；安装后的48项UI退出0，GetPackageFullName确认安装进程包身份。保留已安装试用版和用户授权的证书信任；真正跨版本升级、真实用户图库迁移与其他设备待核实。记录：artifacts/validation/release-v01/certificate-trust.txt、msix-ui.txt、msix-install.json |
 | 用户验收 | 未确认；原型交互选择不等于正式布局验收 |
-| 发布授权 / 实际发布 | D16已明确授权公开GitHub、自签名MSIX与便携ZIP；账号sxwer001已核实，[公开仓库](https://github.com/sxwer001/Stillframe)已创建，源码/Release上传尚在执行，不能视为已上传 |
+| 发布授权 / 实际发布 | D16授权范围内已公开[源码](https://github.com/sxwer001/Stillframe)与[v0.1.0试用Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)，非draft、标记prerelease；五个远端资产大小/SHA256与本地一致。tag指向d8963a6cb500d4cdb7b2a7b93e49a37fde9e7687；主分支随后仅同步发布状态文档。中断产生的本任务废弃草稿已清理。证据：artifacts/validation/release-v01/github-published.json |
 
 ## 阻塞与待核实
 
@@ -56,7 +56,7 @@
 
 ## 下一步
 
-完成授权的公开仓库/Release上传，核对公开状态、提交及全部资产摘要。随后按反馈试用：实际桌面/锁屏效果、其他设备兼容性、跨版本升级及最终布局仍待验收；退出后的后台服务未扩展。
+本次发布与清理已完成。按用户后续反馈试用：实际桌面/锁屏/通知效果、其他设备兼容性、真实图库迁移、跨版本升级及最终布局仍待验收；退出后的后台服务未扩展。不从本次授权推断未来发布或系统壁纸测试授权。
 
 ## 状态更新约定
 

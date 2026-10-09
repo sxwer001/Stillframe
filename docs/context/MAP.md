@@ -26,7 +26,7 @@
 | src/Stillframe.App/WallpaperBrowser.cs | 首页/发现独立大图会话、滚轮累计/节流、会话内ID浏览历史及前后原图复用；不写入持久历史表 |
 | src/Stillframe.App/OnlineSourcesView.cs、AutomationView.cs、Services/PersonalizationService.cs | 在线检索与图源卡片；运行期间定时器和设置；Windows锁屏/通知接口 |
 | src/Stillframe.App/OnlineWindowsChecks.cs | 独立真实API/原图/WIC检查，不调用系统更换接口 |
-| scripts/ | build.ps1、run.ps1、check.ps1；package.ps1生成带清单/校验的便携ZIP；clean.ps1仅清理限定生成目录，支持WhatIf；执行条件见RUNBOOK |
+| scripts/ | build/run/check构建运行与检查；collect-notices保留依赖许可；package生成ZIP，package-msix/verify-msix制作并校验签名安装包，install-trial为发行安装脚本模板；clean仅清理限定生成目录，支持WhatIf；执行条件见RUNBOOK |
 | artifacts/Stillframe-win-x64/ | 本地便携Release输出，直接运行Stillframe.exe；非安装包 |
 | artifacts/releases/ | Stillframe-0.1.0-win-x64.zip、.msix及SHA256；公开CER与安装脚本，ZIP含使用说明/文件清单，均含第三方许可 |
 | packaging/ | MSIX身份/能力清单，原创图标及可重生成脚本；Publisher为CN=Stillframe，Identity为Stillframe.Desktop |
