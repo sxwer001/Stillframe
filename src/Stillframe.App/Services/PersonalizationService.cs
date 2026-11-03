@@ -12,18 +12,20 @@ public sealed class PersonalizationService : IDisposable
     public event Action? NotificationClicked;
     public static bool LockScreenSupported{get{try{return UserProfilePersonalizationSettings.IsSupported();}catch{return false;}}}
     public static bool NotificationsSupported{get{try{return AppNotificationManager.IsSupported();}catch{return false;}}}
-    public async Task SetLockScreenAsync(string original,string root,CancellationToken token)
+    public Task InitializeLockScreenAsync(string root)=>Copies(root).ReconcileAsync();
+    private static LockScreenCopies Copies(string root)=>new(root,async path=>
+    {
+        var file=await StorageFile.GetFileFromPathAsync(path);
+        return await UserProfilePersonalizationSettings.Current.TrySetLockScreenImageAsync(file);
+    },()=>
+    {
+        try{var uri=LockScreen.OriginalImageFile;return Task.FromResult<string?>(uri?.IsFile==true?uri.LocalPath:null);}
+        catch{return Task.FromResult<string?>(null);}
+    });
+    public Task SetLockScreenAsync(string original,string root,CancellationToken token)
     {
         if(!LockScreenSupported)throw new AppException("当前Windows不支持应用设置锁屏，请在系统个性化设置中选择图片。");
-        var folder=Path.Combine(root,"lockscreen");Directory.CreateDirectory(folder);
-        // Windows requires a fresh file name for subsequent lock-screen images.
-        var target=Path.Combine(folder,Guid.NewGuid().ToString("N")+Path.GetExtension(original));File.Copy(original,target);
-        try
-        {
-            token.ThrowIfCancellationRequested();var file=await StorageFile.GetFileFromPathAsync(target);token.ThrowIfCancellationRequested();
-            if(!await UserProfilePersonalizationSettings.Current.TrySetLockScreenImageAsync(file))throw new AppException("Windows拒绝了锁屏设置，请检查个性化权限或组织策略。");
-        }
-        catch{File.Delete(target);throw;}
+        return Copies(root).SetAsync(original,token);
     }
     public void ShowDaily(WallpaperItem item)
     {

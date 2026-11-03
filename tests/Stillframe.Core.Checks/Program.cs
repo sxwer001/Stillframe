@@ -59,6 +59,7 @@ try
     Check(LibraryService.CleanTitle("a\n\rb")=="ab","title strips control characters");
     await OnlineFeatureChecks.RunAsync(root,Check);
     await HomeImageChecks.RunAsync(root,Check);
+    await LockScreenCopyChecks.RunAsync(root,Check);
     Console.WriteLine($"RESULT: {count} checks passed. Fake decoder/effect handlers isolate service tests; real WIC and system effects require separate Windows checks.");
 }
 finally

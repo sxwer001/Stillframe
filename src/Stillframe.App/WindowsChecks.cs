@@ -6,6 +6,18 @@ namespace Stillframe.App;
 
 internal static class WindowsChecks
 {
+    public static async Task ReadLockScreenAsync(string report)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(report))!);
+        string result;
+        try
+        {
+            var uri=Windows.System.UserProfile.LockScreen.OriginalImageFile;
+            result=$"INFO read-only lock-screen source: file-uri={uri?.IsFile==true}; retention/replacement NOT tested; no source paths logged";
+        }
+        catch(Exception ex){result=$"INFO read-only lock-screen source unavailable HRESULT=0x{ex.HResult:X8}; cleanup must defer";}
+        await File.WriteAllTextAsync(report,result);
+    }
     public static async Task RunAsync(string report)
     {
         var temporary=Path.Combine(Path.GetTempPath(),"shijing-windows-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temporary);var lines=new List<string>();

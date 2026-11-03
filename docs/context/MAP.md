@@ -56,6 +56,8 @@ Git状态（2026-10-09）：按D16初始化main分支，公开仓库为[Stillfra
 
 ## 运行与部署位置
 
+锁屏副本所有权清单为`lockscreen/owned-v1.json`，格式与保护策略唯一入口见[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md)；WinRT核对在App层，图库初始化不引入系统接口依赖。
+
 初版数据位于 `%LOCALAPPDATA%/Shijing/`：library.db、originals、thumbnails、staging；启用锁屏设置后另有lockscreen专用副本。不自动删除原图。便携输出包含.NET与Windows App SDK本地运行依赖，整个目录一起保留，不只复制exe。
 
 Debug输出为 `src/Stillframe.App/bin/Debug/net10.0-windows10.0.19041.0/win-x64/`；正式本地试用提供便携ZIP与自签名MSIX。共享图库目录保留旧名称；MSIX关闭文件系统写入虚拟化，并在Windows11精确排除LocalAppData/Shijing，避免包内副本与便携图库分叉。ARM64、自动更新与商店分发未实现。原型输入限制仍见上一节。

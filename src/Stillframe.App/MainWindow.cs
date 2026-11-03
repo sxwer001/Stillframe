@@ -92,7 +92,7 @@ public sealed partial class MainWindow : Window
         {
             if(initialized)return;
             var ready=false;
-            await RunAsync(async _=>{await library.InitializeAsync();await LoadAutomationSettingsAsync();await RefreshAsync();await LoadMonitorsAsync();await LoadAppearanceAsync();var theme=await library.Repository.GetSettingAsync("theme");shell.RequestedTheme=theme=="dark"?ElementTheme.Dark:theme=="light"?ElementTheme.Light:ElementTheme.Default;ready=true;});
+            await RunAsync(async _=>{await library.InitializeAsync();await personalization.InitializeLockScreenAsync(library.Root);await LoadAutomationSettingsAsync();await RefreshAsync();await LoadMonitorsAsync();await LoadAppearanceAsync();var theme=await library.Repository.GetSettingAsync("theme");shell.RequestedTheme=theme=="dark"?ElementTheme.Dark:theme=="light"?ElementTheme.Light:ElementTheme.Default;ready=true;});
             if(!ready){if(smokeReport!=null){await File.WriteAllTextAsync(smokeReport,"FAIL initialization: "+notice.Message);Close();}return;}
             initialized=true;navigation.SelectedItem=navigation.MenuItems[0];await navigationTask;
             if(smokeReport!=null)

@@ -1,12 +1,14 @@
 # 当前目标与状态
 
-核验：2026-10-09；本次范围为英文工程改名、原创相册封面图标、README截图、自签名MSIX/便携ZIP与公开GitHub试用发布。实际发布结果以本文件对应行和远端证据为准；没有执行真实系统壁纸/锁屏更换测试。
+核验：2026-11-04；本次范围为锁屏副本生命周期独立分支修复、隔离回归、App Release编译与只读系统探测。历史发布和安装验证沿用原证据，没有执行真实桌面/锁屏更换。
 
 ## 当前目标
 
 按D16已公开交付“拾景 · Stillframe”0.1.0 x64试用版：中文名与原图库目录保留，工程/命名空间使用Stillframe；[Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)提供自签名MSIX、公开CER、固定证书的安装脚本、便携ZIP和摘要。README已精简并加入真实原生截图，原创相册图标已用于EXE与MSIX。最终包复验和远端摘要核对通过；已清理限定生成目录，保留已安装试用版、授权的证书信任和用户图库。完整设计继续使用 [详细开发方案](../Windows壁纸软件-详细开发方案.html)，当前完成度以本文件为准。
 
 ## 当前进展
+
+2026-11-04独立锁屏修复分支：副本清单、提交意图、保守回收与启动核对已实现，核心85项及App Release编译通过，只读探测file-uri=False；实际锁屏替换与旧源文件释放仍待授权验收，未发布。方法/边界见[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md)。本地证据：artifacts/validation/personalization-20261104/lockscreen/。
 
 | 对象 | 当前状态 | 证据入口 / 范围 |
 | --- | --- | --- |
@@ -32,7 +34,7 @@
 | --- | --- |
 | 历史原型校验 | 2026-10-08前次任务输出记录：10组DOM交互检查通过；候选SQLite表数、完整性和关键约束检查通过。来源是前次任务工具结果；没有另存完整运行日志。本次未重跑，不作当前执行证据。脚本入口见 [RUNBOOK](RUNBOOK.md#已有原型检查) |
 | 本次文档检查 | check-context.py对9份上下文文档、直接文件/锚点链接和14条读写规则通过；外部HTTPS不作可用性校验。记录：artifacts/validation/release-v01/context-check.json；只检查本次改动与直接链接 |
-| 核心库 | 英文工程改名后64项确定性检查通过，包含历史存档、去重和既有服务；解码器/系统效果仍用替身。记录：artifacts/validation/release-v01/core-checks.txt |
+| 核心库 | 2026-11-04本分支85项核心检查通过：已发布基线64项与新增21项隔离回归。真实系统效果仍待授权；方法及范围见[锁屏副本生命周期](LOCKSCREEN_LIFECYCLE.md) |
 | WinUI编译/打包 | 原创新图标的Release重新发布成功；ZIP546文件逐项大小/SHA256通过；MSIX签名CMS、签名中的块映射摘要及551载荷文件/3851块通过，Windows信任后签名状态Valid。记录：artifacts/validation/release-v01/build.txt、zip-build.txt、msix-build.txt；摘要以交付目录为准 |
 | Windows实测 | 初版任务6项诊断通过：真实WIC解码、JPEG缩略图、坏图拒绝、导入去重、原字节导出、COM枚举1屏；本轮未改这些服务、未重跑。历史记录：artifacts/validation/release-windows.txt |
 | WinUI页面/解压包启动 | 原创新图标最终ZIP解压后48条原生UI检查通过，退出码0。README首页/侧栏/详情真实截图通过独立模式生成且人工查看。记录：artifacts/validation/release-v01/portable-final-ui.txt、screenshots.txt。未测物理鼠标或其他机器 |
