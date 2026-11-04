@@ -56,6 +56,8 @@ Git状态（2026-10-09）：按D16初始化main分支，公开仓库为[Stillfra
 
 ## 运行与部署位置
 
+锁屏副本所有权清单为`lockscreen/owned-v1.json`，格式与保护策略唯一入口见[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md)；WinRT核对在App层，图库初始化不引入系统接口依赖。
+
 桌面恢复记录为图库根目录下`desktop-recovery-v1.json`，格式/恢复策略见[桌面持久恢复](DESKTOP_RECOVERY.md)。该文件保留本机图片路径与设备标识，不上传；不占用或迁移SQLite设置表。
 
 初版数据位于 `%LOCALAPPDATA%/Shijing/`：library.db、originals、thumbnails、staging；启用锁屏设置后另有lockscreen专用副本。不自动删除原图。便携输出包含.NET与Windows App SDK本地运行依赖，整个目录一起保留，不只复制exe。

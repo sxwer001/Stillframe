@@ -4,6 +4,8 @@
 
 ## 查看设计资料
 
+锁屏生命周期验证见[独立方法及授权边界](LOCKSCREEN_LIFECYCLE.md#验证与接续)。`scripts/check.ps1`运行包含新增回归的核心检查；`--lockscreen-readcheck <报告路径>`仅探测当前URI类型，不修改系统。实际设置测试仍需明确授权。
+
 桌面恢复验证见[状态机、替身检查与授权边界](DESKTOP_RECOVERY.md#验证与接续)。`scripts/check.ps1`包含新增回归；`--diagnostics`只读COM快照，不调用Set方法。实际设置/回滚仍需另行明确授权，启动时不自动执行恢复。
 
 前置条件：能访问项目文件及浏览器/HTML查看器。

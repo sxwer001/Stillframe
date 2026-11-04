@@ -36,6 +36,8 @@
 
 ## 写入路由
 
+锁屏副本回收或中断恢复任务按需读[生命周期](docs/context/LOCKSCREEN_LIFECYCLE.md)、[LockScreenCopies](src/Stillframe.Core/LockScreenCopies.cs)及[回归](tests/Stillframe.Core.Checks/LockScreenCopyChecks.cs)。
+
 桌面恢复、断开或部分失败任务按需读[持久恢复](docs/context/DESKTOP_RECOVERY.md)、[DesktopRecovery](src/Stillframe.Core/DesktopRecovery.cs)及[回归](tests/Stillframe.Core.Checks/DesktopRecoveryChecks.cs)。
 
 长期规则写 AGENTS；当前状态写 NOW；文件/版本关系写 MAP；方法写 RUNBOOK；确认选择写 DECISIONS；风险证据写 RISKS。具体开发规格定点修改既有详细方案，DDL修改对应SQL；调研新证据更新对应研究条目，其他文档只保留摘要链接。新入口或职责变化时再修订本索引。
