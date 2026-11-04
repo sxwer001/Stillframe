@@ -36,6 +36,8 @@
 
 ## 写入路由
 
+桌面恢复、断开或部分失败任务按需读[持久恢复](docs/context/DESKTOP_RECOVERY.md)、[DesktopRecovery](src/Stillframe.Core/DesktopRecovery.cs)及[回归](tests/Stillframe.Core.Checks/DesktopRecoveryChecks.cs)。
+
 长期规则写 AGENTS；当前状态写 NOW；文件/版本关系写 MAP；方法写 RUNBOOK；确认选择写 DECISIONS；风险证据写 RISKS。具体开发规格定点修改既有详细方案，DDL修改对应SQL；调研新证据更新对应研究条目，其他文档只保留摘要链接。新入口或职责变化时再修订本索引。
 
 运行行为事实以源码和对应范围的当前测试为证据；实际DDL只在src中的schema维护，候选DDL继续保存完整设计，避免互相复制。行为变化时更新README和NOW相关摘要，不把完整实现复制到专题文档。

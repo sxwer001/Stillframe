@@ -16,7 +16,7 @@ namespace Stillframe.App;
 public sealed partial class MainWindow : Window
 {
     private readonly LibraryService library;
-    private readonly DesktopService desktop=new();
+    private readonly DesktopService desktop;
     private readonly NavigationView navigation=new(){FontSize=13,IsBackButtonVisible=NavigationViewBackButtonVisible.Collapsed,IsPaneVisible=false,IsSettingsVisible=true};
     private readonly StackPanel page=new(){Spacing=18,Margin=new Thickness(28)};
     private readonly Grid pageViewport=new();
@@ -40,7 +40,6 @@ public sealed partial class MainWindow : Window
     private IReadOnlyList<WallpaperItem> items=[];
     private WallpaperItem? daily;
     private WallpaperItem? selected;
-    private DesktopSnapshot? snapshot;
     private CancellationTokenSource? operation;
     private string route="today";
     private string query="";
@@ -53,6 +52,7 @@ public sealed partial class MainWindow : Window
     {
         Title="拾景 · 静态壁纸";
         library=new(dataRoot??Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Shijing"),new WicImageProcessor());
+        desktop=new(library.Root);
         homeImages=new(library);
         try{SystemBackdrop=new MicaBackdrop();}catch{}
         AppWindow.Resize(new SizeInt32(1200,850));
@@ -321,8 +321,8 @@ public sealed partial class MainWindow : Window
     private Task ApplyAsync(WallpaperItem item)=>RunAsync(async token=>
     {
         var ready=await library.AcquireAsync(item.Id,Transfer(),token);token.ThrowIfCancellationRequested();
-        var result=await desktop.ApplyAsync(library.OriginalPath(ready)!,monitorId,fit);snapshot=result.Before;
-        Notify(result.Failed.Count==0?$"已设置 {result.Succeeded} 个显示器。可在设置中恢复本次更换前的桌面。":$"成功 {result.Succeeded} 个显示器，失败 {result.Failed.Count} 个。请尝试恢复或重新选择显示器。",result.Failed.Count>0);
+        var result=await desktop.ApplyAsync(library.OriginalPath(ready)!,monitorId,fit);
+        Notify(result.Success?$"已设置 {result.Succeeded} 个显示器。恢复记录已保存，可跨重启恢复。":result.RolledBack?"设置失败，已回滚更换前的桌面。":"设置失败且未完全回滚，恢复记录已保留，请在设置中检查。",!result.Success);
         await RefreshAsync();if(selected!=null)selected=items.First(x=>x.Id==ready.Id);await RenderAsync();
     });
     private void RenderSources(IReadOnlyList<SourceDefinition> sources)

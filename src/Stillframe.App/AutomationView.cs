@@ -46,8 +46,8 @@ public sealed partial class MainWindow
                     var ready=await library.AcquireAsync(item.Id,null,token);token.ThrowIfCancellationRequested();
                     if(kind=="desktop")
                     {
-                        var result=await desktop.ApplyAsync(library.OriginalPath(ready)!,monitorId,fit);snapshot=result.Before;
-                        if(result.Failed.Count>0)throw new AppException("部分显示器自动更换失败，可在设置中恢复。");
+                        var result=await desktop.ApplyAsync(library.OriginalPath(ready)!,monitorId,fit);
+                        if(!result.Success)throw new AppException(result.RolledBack?"桌面自动更换失败，已回滚。":"桌面自动更换未完全恢复，请在设置中处理恢复记录。");
                     }
                     else await personalization.SetLockScreenAsync(library.OriginalPath(ready)!,library.Root,token);
                 },linked.Token);
