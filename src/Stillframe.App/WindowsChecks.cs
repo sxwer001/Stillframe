@@ -40,7 +40,10 @@ internal static class WindowsChecks
                 var exportedBytes=await File.ReadAllBytesAsync(exported);var originalBytes=await File.ReadAllBytesAsync(input);
                 if(!exportedBytes.SequenceEqual(originalBytes))throw new Exception("export modified original");lines.Add("PASS real original export byte equality");
             }
-            var monitors=await new DesktopService().EnumerateAsync();if(monitors.Count<2)throw new Exception("no connected monitor enumerated");lines.Add($"PASS desktop COM enumeration: {monitors.Count-1} monitor(s), no wallpaper mutation");
+            var monitors=await new DesktopService(temporary).EnumerateAsync();if(monitors.Count<2)throw new Exception("no connected monitor enumerated");lines.Add($"PASS desktop COM enumeration: {monitors.Count-1} monitor(s), no wallpaper mutation");
+            var state=await new DesktopService(temporary).ReadSnapshotAsync();
+            if(state.Files.Count<1||!Enum.IsDefined(state.Position))throw new Exception("invalid COM snapshot");
+            lines.Add($"PASS read-only desktop snapshot: {state.Files.Count} active monitor(s), position={(int)state.Position}, status={state.Status}; no paths logged or system writes");
             await File.WriteAllLinesAsync(report,lines);
         }
         finally

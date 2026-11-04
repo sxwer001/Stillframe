@@ -242,9 +242,14 @@ public sealed partial class MainWindow
         var imports=new StackPanel{Spacing=10,Children={Text($"已收录 {items.Count} 张图片",12),Row(Action("导入图片",async ()=>{await ImportFilesAsync();},true),Action("导入文件夹",ImportFolderAsync)),Action("打开数据目录",()=>{Process.Start(new ProcessStartInfo{FileName="explorer.exe",ArgumentList={library.Root},UseShellExecute=false});return Task.CompletedTask;})}};
         panel.Children.Add(SettingCard("本地图库","原图导入后可离线使用，保留你的源文件。",new Expander{Header="导入与存储",HorizontalAlignment=HorizontalAlignment.Stretch,Content=imports}));
 
-        var restore=Action("恢复本次更换前的桌面",()=>RunAsync(async _=>{if(snapshot==null)return;var failed=await desktop.RestoreAsync(snapshot);Notify(failed==0?"已尝试恢复原桌面。":"部分屏幕无法恢复，请检查旧文件或屏幕连接。",failed>0);}));restore.IsEnabled=snapshot!=null;
-        var desktopControls=new StackPanel{Spacing=10,Children={TargetOptions(),Action("重新检测显示器",()=>RunAsync(async _=>{await LoadMonitorsAsync();drawerBody.Content=await BuildSettingsPanelAsync();Notify("显示器列表已更新。");})),restore}};
-        panel.Children.Add(SettingCard("桌面壁纸","选择显示器与适配方式；恢复保留本次会话的更换前状态。",new Expander{Header="显示器与恢复",HorizontalAlignment=HorizontalAlignment.Stretch,Content=desktopControls}));
+        var restore=Action("恢复更换前的桌面",()=>RunAsync(async _=>{var result=await desktop.RestoreAsync();Notify(result.Remaining==0?"桌面已恢复，恢复记录已清除。":"部分屏幕无法恢复：可能已被手动更改、断开或原图丢失。记录已保留，未覆盖冲突状态。",result.Remaining>0);drawerBody.Content=await BuildSettingsPanelAsync();}));restore.IsEnabled=desktop.HasRecovery;
+        var discard=Action("放弃恢复记录…",async ()=>
+        {
+            var dialog=new ContentDialog{Title="放弃桌面恢复记录？",Content="只删除拾景的恢复记录，当前桌面和原始图片不变。",PrimaryButtonText="放弃记录",CloseButtonText="取消",XamlRoot=page.XamlRoot};
+            if(await dialog.ShowAsync()==ContentDialogResult.Primary)await RunAsync(async _=>{await desktop.DiscardRecoveryAsync();drawerBody.Content=await BuildSettingsPanelAsync();});
+        });discard.IsEnabled=desktop.HasRecovery;
+        var desktopControls=new StackPanel{Spacing=10,Children={TargetOptions(),Action("重新检测显示器",()=>RunAsync(async _=>{await LoadMonitorsAsync();drawerBody.Content=await BuildSettingsPanelAsync();Notify("显示器列表已更新。");})),restore,discard}};
+        panel.Children.Add(SettingCard("桌面壁纸","恢复记录跨重启保留；启动时不自动恢复。幻灯片、禁用背景或旧原图不可用时不执行更换。",new Expander{Header="显示器与恢复",HorizontalAlignment=HorizontalAlignment.Stretch,Content=desktopControls}));
 
         var sources=await library.Repository.GetSourcesAsync();
         panel.Children.Add(SettingCard("图源管理",$"已有 {sources.Count} 个图源 · 本地图片、HTTPS直链与JSON清单。",Action("管理图源",async ()=>{CloseSettings();await NavigateAsync("sources");})));

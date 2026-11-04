@@ -60,6 +60,8 @@ try
     await OnlineFeatureChecks.RunAsync(root,Check);
     await HomeImageChecks.RunAsync(root,Check);
     await LockScreenCopyChecks.RunAsync(root,Check);
+    await DesktopRecoveryChecks.RunAsync(root,Check);
+    if(OperatingSystem.IsWindows())MonitorChecks.Run(Check);
     Console.WriteLine($"RESULT: {count} checks passed. Fake decoder/effect handlers isolate service tests; real WIC and system effects require separate Windows checks.");
 }
 finally

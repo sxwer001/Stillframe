@@ -1,6 +1,6 @@
 # 当前目标与状态
 
-核验：2026-11-04；本次范围为锁屏副本生命周期独立分支修复、隔离回归、App Release编译与只读系统探测。历史发布和安装验证沿用原证据，没有执行真实桌面/锁屏更换。
+核验：2026-11-04；本次范围为桌面恢复与锁屏副本生命周期修复的联合验证。历史发布和安装记录沿用原证据，没有执行真实桌面/锁屏更换。
 
 ## 当前目标
 
@@ -9,6 +9,8 @@
 ## 当前进展
 
 2026-11-04独立锁屏修复分支：副本清单、提交意图、保守回收与启动核对已实现，核心85项及App Release编译通过，只读探测file-uri=False；实际锁屏替换与旧源文件释放仍待授权验收，未发布。方法/边界见[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md)。本地证据：artifacts/validation/personalization-20261104/lockscreen/。
+
+2026-11-04独立桌面修复分支：跨重启快照、异常回滚与比较后恢复已实现，核心96项及App Release编译通过；7项隔离Windows诊断（含只读COM状态）通过。没有真实桌面更换、发布或自动恢复。方法/边界见[桌面持久恢复](DESKTOP_RECOVERY.md)。本地证据：artifacts/validation/personalization-20261104/desktop/。
 
 | 对象 | 当前状态 | 证据入口 / 范围 |
 | --- | --- | --- |
@@ -34,14 +36,14 @@
 | --- | --- |
 | 历史原型校验 | 2026-10-08前次任务输出记录：10组DOM交互检查通过；候选SQLite表数、完整性和关键约束检查通过。来源是前次任务工具结果；没有另存完整运行日志。本次未重跑，不作当前执行证据。脚本入口见 [RUNBOOK](RUNBOOK.md#已有原型检查) |
 | 本次文档检查 | check-context.py对9份上下文文档、直接文件/锚点链接和14条读写规则通过；外部HTTPS不作可用性校验。记录：artifacts/validation/release-v01/context-check.json；只检查本次改动与直接链接 |
-| 核心库 | 2026-11-04本分支85项核心检查通过：已发布基线64项与新增21项隔离回归。真实系统效果仍待授权；方法及范围见[锁屏副本生命周期](LOCKSCREEN_LIFECYCLE.md) |
+| 核心库 | 2026-11-04合并后117项联合检查通过：基线64项、桌面/显示器32项及锁屏21项。真实系统效果仍待授权；范围见[桌面持久恢复](DESKTOP_RECOVERY.md)及[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md) |
 | WinUI编译/打包 | 原创新图标的Release重新发布成功；ZIP546文件逐项大小/SHA256通过；MSIX签名CMS、签名中的块映射摘要及551载荷文件/3851块通过，Windows信任后签名状态Valid。记录：artifacts/validation/release-v01/build.txt、zip-build.txt、msix-build.txt；摘要以交付目录为准 |
 | Windows实测 | 初版任务6项诊断通过：真实WIC解码、JPEG缩略图、坏图拒绝、导入去重、原字节导出、COM枚举1屏；本轮未改这些服务、未重跑。历史记录：artifacts/validation/release-windows.txt |
 | WinUI页面/解压包启动 | 原创新图标最终ZIP解压后48条原生UI检查通过，退出码0。README首页/侧栏/详情真实截图通过独立模式生成且人工查看。记录：artifacts/validation/release-v01/portable-final-ui.txt、screenshots.txt。未测物理鼠标或其他机器 |
 | 真实公共API/图片 | 上一轮18条PASS，退出码0；本轮未重跑、不作新增界面联网验收。覆盖三源元数据、预览/WIC、原图/WIC与原字节导出、Wallhaven关键词/第二页，以及每日/随机单张选图。记录：artifacts/validation/home-v6/api-windows.txt。联调中Commons曾遇TLS连接中断，保护见RISKS R01 |
 | Bing历史API/原图 | 上一轮4条PASS，退出码0；本轮未重新联网。历史分页/独立ID、较早日期原图真实下载与WIC解码、未看随机图及每日缓存隔离；接口证据以research/source-api-evidence-2026-10-09.json为准；报告artifacts/validation/layout-v8/bing-archive-api.txt，诊断图库已清理 |
 | 锁屏/通知能力 | 本机IsSupported探测均true；未注册/展示通知，未实际更换锁屏，不等于系统效果通过 |
-| 实际桌面设置、多屏热拔插、恢复 | 已编写调用代码；没有实际修改/回滚桌面的通过证据，待手动验收 |
+| 实际桌面设置、多屏热拔插、恢复 | 持久化/故障回滚/外部修改保护已通过替身回归，只读COM快照可用；没有真实修改、热拔插或回滚的通过证据，待授权验收 |
 | 安装/升级/卸载验证 | 已授权并通过UAC导入公开CER到LocalMachine/TrustedPeople，签名Valid。原创新图标最终MSIX卸载后重装成功；安装后的48项UI退出0，GetPackageFullName确认安装进程包身份。保留已安装试用版和用户授权的证书信任；真正跨版本升级、真实用户图库迁移与其他设备待核实。记录：artifacts/validation/release-v01/certificate-trust.txt、msix-ui.txt、msix-install.json |
 | 用户验收 | 未确认；原型交互选择不等于正式布局验收 |
 | 发布授权 / 实际发布 | D16授权范围内已公开[源码](https://github.com/sxwer001/Stillframe)与[v0.1.0试用Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)，非draft、标记prerelease；五个远端资产大小/SHA256与本地一致。tag指向d8963a6cb500d4cdb7b2a7b93e49a37fde9e7687；主分支随后仅同步发布状态文档。中断产生的本任务废弃草稿已清理。证据：artifacts/validation/release-v01/github-published.json |
