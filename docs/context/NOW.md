@@ -1,16 +1,16 @@
 # 当前目标与状态
 
-核验：2026-11-04；本次范围为桌面恢复与锁屏副本生命周期修复的联合验证。历史发布和安装记录沿用原证据，没有执行真实桌面/锁屏更换。
+核验：2026-11-04；本次范围为两项个性化修复的合并、v0.1.1构建与试用包验证。历史安装记录沿用原证据，没有执行真实桌面/锁屏更换。
 
 ## 当前目标
 
-按D16已公开交付“拾景 · Stillframe”0.1.0 x64试用版：中文名与原图库目录保留，工程/命名空间使用Stillframe；[Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)提供自签名MSIX、公开CER、固定证书的安装脚本、便携ZIP和摘要。README已精简并加入真实原生截图，原创相册图标已用于EXE与MSIX。最终包复验和远端摘要核对通过；已清理限定生成目录，保留已安装试用版、授权的证书信任和用户图库。完整设计继续使用 [详细开发方案](../Windows壁纸软件-详细开发方案.html)，当前完成度以本文件为准。
+按用户本次“合并然后发布新版本”的授权，交付“拾景 · Stillframe”v0.1.1 x64试用版，沿用自签名MSIX、公开CER、安装脚本、便携ZIP和摘要。两项修复已合并主分支，包验证完成；尚未公开v0.1.1。变更范围见[版本说明](../releases/v0.1.1.md)，完整设计继续使用[详细开发方案](../Windows壁纸软件-详细开发方案.html)。
 
 ## 当前进展
 
-2026-11-04独立锁屏修复分支：副本清单、提交意图、保守回收与启动核对已实现，核心85项及App Release编译通过，只读探测file-uri=False；实际锁屏替换与旧源文件释放仍待授权验收，未发布。方法/边界见[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md)。本地证据：artifacts/validation/personalization-20261104/lockscreen/。
+锁屏副本修复[#2](https://github.com/sxwer001/Stillframe/pull/2)已合并：副本清单、提交意图、保守回收与启动核对已实现。只读探测file-uri=False时延期回收，实际锁屏替换与旧源文件释放仍待授权验收。方法/边界见[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md)。
 
-2026-11-04独立桌面修复分支：跨重启快照、异常回滚与比较后恢复已实现，核心96项及App Release编译通过；7项隔离Windows诊断（含只读COM状态）通过。没有真实桌面更换、发布或自动恢复。方法/边界见[桌面持久恢复](DESKTOP_RECOVERY.md)。本地证据：artifacts/validation/personalization-20261104/desktop/。
+桌面恢复修复[#1](https://github.com/sxwer001/Stillframe/pull/1)已合并：跨重启快照、异常回滚与比较后恢复已实现。7项隔离Windows诊断（含只读COM状态）通过，没有真实桌面更换或自动恢复。方法/边界见[桌面持久恢复](DESKTOP_RECOVERY.md)。联合核心检查117项通过；本次发布证据位于独立发布工作区的artifacts/validation/v0.1.1/，不纳入源码。
 
 | 对象 | 当前状态 | 证据入口 / 范围 |
 | --- | --- | --- |
@@ -26,8 +26,8 @@
 | 滚轮浏览 | 两页分别记录本次运行看过的图片ID，下滑向前、上滑返回，前进历史原图复用；随机选择排除已看图，其他分页来源需要时读取后续页。累计/节流，加载/侧栏/详情期间不切图；离开发现取消下载。Bing历史图浏览不覆盖每日缓存 | [浏览状态与滚轮](../../src/Stillframe.App/WallpaperBrowser.cs)、[去重选择](../../src/Stillframe.Core/HomeImageService.cs)；物理鼠标验收待确认 |
 | 手动锁屏 | 图片右键和详情更多菜单均可按需获取原图并调用既有Windows锁屏服务；当前只验证入口和编译，未修改用户锁屏 | [图片命令](../../src/Stillframe.App/PictureCommands.cs)、[Windows调用](../../src/Stillframe.App/Services/PersonalizationService.cs) |
 | 每日任务 | 默认关闭；运行中按执行小时检查，成功日期去重，失败15分钟重试。桌面/锁屏/通知分别启用，Windows效果未实测 | [调度](../../src/Stillframe.Core/DailyAutomation.cs)、[原生设置](../../src/Stillframe.App/AutomationView.cs)、[Windows调用](../../src/Stillframe.App/Services/PersonalizationService.cs) |
-| Release构建与试用包 | 已生成英文工程的0.1.0 x64 ZIP及自签名MSIX；保留第三方许可/NOTICE。MSIX额外携带resources.pri，修复安装后的主题字典加载问题；发布状态单列 | [MSIX方法](RUNBOOK.md#试用版msix与公开发布)、[交付映射](MAP.md#运行与部署位置) |
-| 生成文件清理 | 本轮删除9个限定目录，文件大小合计805.3 MiB；源码、文档、SDK、Release/ZIP/MSIX、报告/截图保留，用户图库不在清理范围内 | artifacts/validation/release-v01/cleanup.json；方法与保护见RUNBOOK |
+| Release构建与试用包 | 已生成0.1.1 x64 ZIP及自签名MSIX；沿用证书和包身份，保留第三方许可/NOTICE及resources.pri；发布状态单列 | [MSIX方法](RUNBOOK.md#试用版msix与公开发布)、[交付映射](MAP.md#运行与部署位置) |
+| 生成文件清理 | v0.1.0历史清理记录保留；本轮使用独立发布工作区，原工作区未提交功能和用户图库保留 | artifacts/validation/release-v01/cleanup.json；方法与保护见RUNBOOK |
 | 基础上下文文档 | 已建立规则、索引、使用入口与专题分工 | [索引](../../PROJECT_INDEX.md)；当前检查状态见下表 |
 
 ## 验证状态
@@ -35,18 +35,18 @@
 | 验证层次 | 状态 |
 | --- | --- |
 | 历史原型校验 | 2026-10-08前次任务输出记录：10组DOM交互检查通过；候选SQLite表数、完整性和关键约束检查通过。来源是前次任务工具结果；没有另存完整运行日志。本次未重跑，不作当前执行证据。脚本入口见 [RUNBOOK](RUNBOOK.md#已有原型检查) |
-| 本次文档检查 | check-context.py对9份上下文文档、直接文件/锚点链接和14条读写规则通过；外部HTTPS不作可用性校验。记录：artifacts/validation/release-v01/context-check.json；只检查本次改动与直接链接 |
+| 本次文档检查 | check-context.py通过：9份上下文文档、167个直接链接及14条读写规则。记录：artifacts/validation/v0.1.1/context-check.json；外部HTTPS不作可用性校验 |
 | 核心库 | 2026-11-04合并后117项联合检查通过：基线64项、桌面/显示器32项及锁屏21项。真实系统效果仍待授权；范围见[桌面持久恢复](DESKTOP_RECOVERY.md)及[锁屏生命周期](LOCKSCREEN_LIFECYCLE.md) |
-| WinUI编译/打包 | 原创新图标的Release重新发布成功；ZIP546文件逐项大小/SHA256通过；MSIX签名CMS、签名中的块映射摘要及551载荷文件/3851块通过，Windows信任后签名状态Valid。记录：artifacts/validation/release-v01/build.txt、zip-build.txt、msix-build.txt；摘要以交付目录为准 |
-| Windows实测 | 初版任务6项诊断通过：真实WIC解码、JPEG缩略图、坏图拒绝、导入去重、原字节导出、COM枚举1屏；本轮未改这些服务、未重跑。历史记录：artifacts/validation/release-windows.txt |
-| WinUI页面/解压包启动 | 原创新图标最终ZIP解压后48条原生UI检查通过，退出码0。README首页/侧栏/详情真实截图通过独立模式生成且人工查看。记录：artifacts/validation/release-v01/portable-final-ui.txt、screenshots.txt。未测物理鼠标或其他机器 |
+| WinUI编译/打包 | v0.1.1 Release发布输出生成成功；ZIP546文件逐项大小/SHA256通过；MSIX签名CMS、签名中的块映射摘要及551载荷文件/3851块通过，签名状态Valid。记录：artifacts/validation/v0.1.1/build.txt、zip.txt、msix.txt；摘要以交付目录为准 |
+| Windows实测 | v0.1.1解压包7项诊断通过，退出码0：WIC解码、JPEG缩略图、坏图拒绝、导入去重、原字节导出、COM枚举及只读桌面快照；临时图库与用户数据隔离，没有系统写入。记录：artifacts/validation/v0.1.1/portable-*/windows-readchecks.txt |
+| WinUI页面/解压包启动 | v0.1.1解压包48项原生UI检查通过，退出码0，EXE版本0.1.1.0；独立诊断数据、自动任务停止。记录：artifacts/validation/v0.1.1/portable-result.json及对应native-ui.txt。README截图沿用v0.1.0原生截图 |
 | 真实公共API/图片 | 上一轮18条PASS，退出码0；本轮未重跑、不作新增界面联网验收。覆盖三源元数据、预览/WIC、原图/WIC与原字节导出、Wallhaven关键词/第二页，以及每日/随机单张选图。记录：artifacts/validation/home-v6/api-windows.txt。联调中Commons曾遇TLS连接中断，保护见RISKS R01 |
 | Bing历史API/原图 | 上一轮4条PASS，退出码0；本轮未重新联网。历史分页/独立ID、较早日期原图真实下载与WIC解码、未看随机图及每日缓存隔离；接口证据以research/source-api-evidence-2026-10-09.json为准；报告artifacts/validation/layout-v8/bing-archive-api.txt，诊断图库已清理 |
 | 锁屏/通知能力 | 本机IsSupported探测均true；未注册/展示通知，未实际更换锁屏，不等于系统效果通过 |
 | 实际桌面设置、多屏热拔插、恢复 | 持久化/故障回滚/外部修改保护已通过替身回归，只读COM快照可用；没有真实修改、热拔插或回滚的通过证据，待授权验收 |
-| 安装/升级/卸载验证 | 已授权并通过UAC导入公开CER到LocalMachine/TrustedPeople，签名Valid。原创新图标最终MSIX卸载后重装成功；安装后的48项UI退出0，GetPackageFullName确认安装进程包身份。保留已安装试用版和用户授权的证书信任；真正跨版本升级、真实用户图库迁移与其他设备待核实。记录：artifacts/validation/release-v01/certificate-trust.txt、msix-ui.txt、msix-install.json |
+| 安装/升级/卸载验证 | v0.1.0历史安装/卸载和证书信任记录保留。本次未安装v0.1.1、未修改证书信任；跨版本升级、真实用户图库迁移与其他设备待核实。历史记录：artifacts/validation/release-v01/certificate-trust.txt、msix-ui.txt、msix-install.json |
 | 用户验收 | 未确认；原型交互选择不等于正式布局验收 |
-| 发布授权 / 实际发布 | D16授权范围内已公开[源码](https://github.com/sxwer001/Stillframe)与[v0.1.0试用Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)，非draft、标记prerelease；五个远端资产大小/SHA256与本地一致。tag指向d8963a6cb500d4cdb7b2a7b93e49a37fde9e7687；主分支随后仅同步发布状态文档。中断产生的本任务废弃草稿已清理。证据：artifacts/validation/release-v01/github-published.json |
+| 发布授权 / 实际发布 | 本次已授权合并并发布v0.1.1；#1、#2均已合并，v0.1.1待上传。既有[v0.1.0试用Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.0)保留 |
 
 ## 阻塞与待核实
 
@@ -60,7 +60,7 @@
 
 ## 下一步
 
-本次发布与清理已完成。按用户后续反馈试用：实际桌面/锁屏/通知效果、其他设备兼容性、真实图库迁移、跨版本升级及最终布局仍待验收；退出后的后台服务未扩展。不从本次授权推断未来发布或系统壁纸测试授权。
+提交v0.1.1版本变更、打标签、上传五项资产并核对远端大小/SHA256后发布试用版。实际桌面/锁屏/通知效果、其他设备兼容性、真实图库迁移和跨版本升级仍待验收；本次授权不包含系统壁纸写入测试。
 
 ## 状态更新约定
 

@@ -23,7 +23,7 @@ public sealed class SafeHttp : IDisposable
             throw new AppException("无法连接图源，请检查网络。");
         };
         client=new(handler){Timeout=TimeSpan.FromMinutes(3)};
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Stillframe/0.1 (Windows static wallpaper)");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("Stillframe/0.1.1 (Windows static wallpaper)");
     }
     public static bool IsPublicAddress(IPAddress address)
     {

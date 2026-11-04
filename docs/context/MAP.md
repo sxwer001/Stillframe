@@ -1,6 +1,6 @@
 # 目录与运行对象映射
 
-核验：2026-10-09；本轮范围为新增API/每日任务模块、SQLite迁移、设置及本地输出关系；其余配置沿用此前证据。下表是条件定位关系，不是必读清单。
+核验：2026-11-04；本轮范围为v0.1.1版本、试用包与个性化记录位置；其余配置沿用此前证据。下表是条件定位关系，不是必读清单。
 
 ## 现有目录
 
@@ -28,7 +28,7 @@
 | src/Stillframe.App/OnlineWindowsChecks.cs | 独立真实API/原图/WIC检查，不调用系统更换接口 |
 | scripts/ | build/run/check构建运行与检查；collect-notices保留依赖许可；package生成ZIP，package-msix/verify-msix制作并校验签名安装包，install-trial为发行安装脚本模板；clean仅清理限定生成目录，支持WhatIf；执行条件见RUNBOOK |
 | artifacts/Stillframe-win-x64/ | 本地便携Release输出，直接运行Stillframe.exe；非安装包 |
-| artifacts/releases/ | Stillframe-0.1.0-win-x64.zip、.msix及SHA256；公开CER与安装脚本，ZIP含使用说明/文件清单，均含第三方许可 |
+| artifacts/releases/ | Stillframe-0.1.1-win-x64.zip、.msix及SHA256；公开CER与安装脚本，ZIP含使用说明/文件清单，均含第三方许可 |
 | packaging/ | MSIX身份/能力清单，原创图标及可重生成脚本；Publisher为CN=Stillframe，Identity为Stillframe.Desktop |
 | docs/screenshots/ | 原生WinUI截图，来自独立诊断图库与原创演示图 |
 | artifacts/validation/ | 当前构建检查记录与UI自身渲染图；不默认读取或作为源码 |
@@ -40,6 +40,7 @@ Git状态（2026-10-09）：按D16初始化main分支，公开仓库为[Stillfra
 
 | 对象 | 已有信息 | 状态边界 |
 | --- | --- | --- |
+| 当前试用版本 | 应用Version为0.1.1；MSIX/app.manifest为0.1.1.0 | 保留Stillframe.Desktop身份、CN=Stillframe发布者与原证书；发布状态以[NOW](NOW.md#验证状态)为准 |
 | 初版工程 | C#，SDK10.0.401；Windows App SDK1.8.260921001；Microsoft.Data.Sqlite10.0.12 | global.json、csproj及packages.lock.json锁定；最低目标Windows10 build19041，其他机器兼容性待验证 |
 | SQLite候选结构 | SQL设置user_version=1 | 尚未建立运行数据库；不得每次启动重跑建表脚本 |
 | 实际SQLite结构 | src/Stillframe.Core/Storage/schema.sql：sources/items/daily/settings；user_version=2，items增加preview_url | 仓储从旧版本定点迁移，保留原图引用和收藏；与13表设计稿用途不同，不互相覆盖 |

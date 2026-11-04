@@ -23,13 +23,13 @@
 
 ## 下载与安装
 
-前往 [Releases](https://github.com/sxwer001/Stillframe/releases) 下载 **0.1.0 试用版**。支持 Windows 10 2004（build 19041）及以上的 **x64** 系统，包含 .NET 与 Windows App SDK 运行依赖。
+前往 [v0.1.1 Release](https://github.com/sxwer001/Stillframe/releases/tag/v0.1.1) 下载 **0.1.1 试用版**。支持 Windows 10 2004（build 19041）及以上的 **x64** 系统，包含 .NET 与 Windows App SDK 运行依赖。
 
-**便携 ZIP**：下载 `Stillframe-0.1.0-win-x64.zip`，解压整个文件夹，双击 `Stillframe.exe`。不要只复制 EXE；便携版未做 EXE 代码签名。
+**便携 ZIP**：下载 `Stillframe-0.1.1-win-x64.zip`，解压整个文件夹，双击 `Stillframe.exe`。不要只复制 EXE；便携版未做 EXE 代码签名。
 
 **自签名 MSIX**：下载以下三个文件并放在同一个文件夹：
 
-- `Stillframe-0.1.0-win-x64.msix`
+- `Stillframe-0.1.1-win-x64.msix`
 - `Stillframe-Trial.cer`（仅公开证书，不含私钥）
 - `Install-Stillframe.ps1`
 
@@ -44,6 +44,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Install-Stillframe.ps1
 两种版本沿用 `%LOCALAPPDATA%\Shijing` 存储图库和设置，保留原来的数据目录。导入复制原图，不修改源文件；卸载或更新程序不会主动删除图库。更新前建议备份此目录，同一时间只运行一个版本。
 
 ## 使用
+
+v0.1.1增加跨重启的桌面恢复记录与设置失败回滚；在设置的“桌面壁纸”中手动恢复。系统中后来更改的壁纸、已断开显示器和缺失原图会保留待处理。锁屏副本仅在系统读回及内容校验满足条件时回收，当前文件、上一张及不明副本保留。详见[更新说明](docs/releases/v0.1.1.md)。
 
 左上角横杠打开侧栏；展开“发现壁纸”选择图源。鼠标在大图上滚动切换图片，点击信息卡进入详情，右键打开快捷操作。收藏和下载后的原图可以离线查看，首次获取在线图片需要网络。
 
